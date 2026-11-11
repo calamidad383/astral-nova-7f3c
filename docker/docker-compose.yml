@@ -20,3 +20,21 @@ services:
     restart: unless-stopped
     depends_on:
       - api
+
+  caddy:
+    image: caddy:2
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../app:/srv/app:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: unless-stopped
+    depends_on:
+      - api
+
+volumes:
+  caddy_data:
+  caddy_config:
