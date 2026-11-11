@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0D12">
+<title>Astral — Panel de tu servidor</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="logo">✦</span> Astral</div>
+  <span id="estado-api" class="pill">conectando…</span>
+</header>
+
+<main id="vista-login" class="centro oculto">
+  <div class="tarjeta">
+    <h1>Convierte la IA en el administrador de tu servidor</h1>
+    <p>Dile qué comunidad quieres y la IA monta y administra todo: roles, canales, reglas, tickets y módulos.</p>
+    <a id="btn-discord" class="boton principal" href="#">Iniciar sesión con Discord</a>
+    <p class="nota">Solo pedimos permiso para ver tu identidad y los servidores que administras.</p>
+  </div>
+</main>
+
+<main id="vista-panel" class="oculto">
+  <nav class="tabs">
+    <button data-tab="inicio" class="activo">Inicio</button>
+    <button data-tab="servidor">Servidor</button>
+    <button data-tab="ia">IA</button>
+    <button data-tab="modulos">Módulos</button>
+    <button data-tab="cuenta">Cuenta</button>
+  </nav>
+
+  <section id="tab-inicio" class="tab">
+    <div class="rejilla">
+      <div class="tarjeta"><h3>Servidores</h3><div id="lista-servidores">Cargando…</div></div>
+      <div class="tarjeta"><h3>Estado</h3><div id="estado-detalle">—</div></div>
+      <div class="tarjeta ancho"><h3>Constructor con IA</h3>
+        <textarea id="descripcion-comunidad" placeholder="Ej.: servidor para mi comunidad de trading educativo, 200 miembros, tono amable, en español"></textarea>
+        <button id="btn-plan" class="boton principal">Proponer plan con IA</button>
+        <pre id="plan-resultado" class="salida">El plan aparecerá aquí.</pre>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-servidor" class="tab oculto">
+    <div class="rejilla">
+      <div class="tarjeta ancho"><h3>Estructura propuesta</h3><div id="estructura">Aplica un plan del constructor para ver la estructura.</div></div>
+    </div>
+  </section>
+
+  <section id="tab-ia" class="tab oculto">
+    <div class="rejilla">
+      <div class="tarjeta ancho"><h3>Base de conocimiento</h3>
+        <input id="doc-titulo" placeholder="Título (ej.: FAQ de pagos)">
+        <textarea id="doc-contenido" placeholder="Contenido del documento; la IA responderá citando este documento"></textarea>
+        <button id="btn-doc" class="boton principal">Añadir documento</button>
+        <ul id="lista-docs"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-modulos" class="tab oculto">
+    <div class="rejilla" id="lista-modulos"></div>
+  </section>
+
+  <section id="tab-cuenta" class="tab oculto">
+    <div class="rejilla">
+      <div class="tarjeta"><h3>Plan</h3><p>Gratis · constructor con límite · IA con límite diario.</p><button class="boton">Mejorar plan (PayPal)</button></div>
+      <div class="tarjeta"><h3>Privacidad</h3><p>Puedes exportar o eliminar tus datos cuando quieras (ver PRIVACY.md).</p></div>
+    </div>
+  </section>
+</main>
+
+<footer class="pie">Código abierto · <a href="https://github.com/calamidad383/astral-nova-7f3c">repositorio</a> · v0.1</footer>
+<script src="app.js"></script>
+</body>
+</html>

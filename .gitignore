@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+*.db
+*.sqlite3
+data/
+node_modules/
+dist/
+build/
+.dart_tool/
+.flutter-plugins*
+.DS_Store
+.pytest_cache/

@@ -1,0 +1,198 @@
+const API = localStorage.getItem("api_url") || "http://localhost:8000";
+const TOKEN = localStorage.getItem("token");
+const NOMBRES_MODULOS = {
+  bienvenida: "Bienvenida y despedida",
+  moderacion: "Moderación base",
+  anti_spam: "Anti-spam",
+  verificacion: "Verificación",
+  logs: "Registros",
+  roles_botones: "Roles por botones",
+  encuestas: "Encuestas",
+  tickets: "Tickets",
+  pregunta: "IA /pregunta",
+  constructor: "Constructor con IA",
+};
+
+const $ = (sel) => document.querySelector(sel);
+
+function mostrar(vista) {
+  for (const id of ["vista-login", "vista-panel"]) {
+    document.getElementById(id).classList.toggle("oculto", id !== vista);
+  }
+}
+
+async function api(ruta, opciones = {}) {
+  const r = await fetch(API + ruta, {
+    ...opciones,
+    headers: {
+      "Content-Type": "application/json",
+      ...(TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {}),
+      ...(opciones.headers || {}),
+    },
+  });
+  if (!r.ok) throw new Error(`${r.status} ${await r.text()}`);
+  return r.json();
+}
+
+async function revisarEstado() {
+  const pill = $("#estado-api");
+  try {
+    const estado = await api("/estado");
+    pill.textContent = estado.ia_disponible ? "API lista · IA activa" : "API lista · IA sin configurar";
+    $("#estado-detalle").textContent = estado.ia_disponible
+      ? "API y Gemini conectados."
+      : "API funcionando. Añade GEMINI_API_KEY en el servidor para activar la IA (el RAG con citas funciona igual).";
+  } catch {
+    pill.textContent = "API no disponible";
+    $("#estado-detalle").textContent = "No se pudo conectar con la API en " + API;
+  }
+}
+
+function pintarServidores(servidores) {
+  const cont = $("#lista-servidores");
+  if (!servidores.length) {
+    cont.innerHTML = "<p>No administras ningún servidor con el bot aún.</p>";
+    return;
+  }
+  cont.innerHTML = servidores
+    .map((s) => `<div class="modulo-fila"><span>${s.nombre}</span><span class="pill">${s.dueno ? "dueño" : "admin"}</span></div>`)
+    .join("");
+}
+
+function pintarModulos() {
+  const cont = $("#lista-modulos");
+  cont.innerHTML = Object.entries(NOMBRES_MODULOS)
+    .map(
+      ([id, nombre]) => `
+      <div class="tarjeta modulo-fila" data-modulo="${id}">
+        <span>${nombre}</span>
+        <button class="interruptor" aria-label="Activar ${nombre}"></button>
+      </div>`
+    )
+    .join("");
+  cont.querySelectorAll(".interruptor").forEach((boton) => {
+    boton.addEventListener("click", () => alternarModulo(boton));
+  });
+}
+
+async function alternarModulo(boton) {
+  const id = boton.closest("[data-modulo]").dataset.modulo;
+  const activar = !boton.classList.contains("activo");
+  const servidorId = localStorage.getItem("servidor_id") || "0";
+  try {
+    await api(`/servidores/${servidorId}/modulos/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ activo: activar }),
+    });
+    boton.classList.toggle("activo", activar);
+  } catch (e) {
+    alert("No se pudo cambiar el módulo: " + e.message);
+  }
+}
+
+async function cargarModulos() {
+  const servidorId = localStorage.getItem("servidor_id") || "0";
+  for (const id of Object.keys(NOMBRES_MODULOS)) {
+    try {
+      const datos = await api(`/servidores/${servidorId}/modulos/${id}`);
+      const fila = document.querySelector(`[data-modulo="${id}"] .interruptor`);
+      if (fila) fila.classList.toggle("activo", datos.activo);
+    } catch { /* sin sesión: se muestran apagados */ }
+  }
+}
+
+async function cargarDocs() {
+  const servidorId = localStorage.getItem("servidor_id") || "0";
+  try {
+    const datos = await api(`/servidores/${servidorId}/conocimiento`);
+    $("#lista-docs").innerHTML = datos.documentos
+      .map((d) => `<li><strong>${d.titulo}</strong> <span class="pill">${d.id}</span></li>`)
+      .join("") || "<li>Sin documentos todavía.</li>";
+  } catch {
+    $("#lista-docs").innerHTML = "<li>Inicia sesión para ver tus documentos.</li>";
+  }
+}
+
+async function proponerPlan() {
+  const descripcion = $("#descripcion-comunidad").value.trim();
+  if (!descripcion) return alert("Describe primero tu comunidad.");
+  const servidorId = localStorage.getItem("servidor_id") || "0";
+  $("#plan-resultado").textContent = "Pidiendo plan a la IA…";
+  try {
+    const datos = await api(`/servidores/${servidorId}/constructor/plan`, {
+      method: "POST",
+      body: JSON.stringify({ descripcion }),
+    });
+    const plan = datos.plan;
+    const lineas = ["Roles:"];
+    plan.roles.forEach((r) => lineas.push(`  • ${r.nombre} (${r.plantilla})`));
+    lineas.push("Canales:");
+    plan.categorias.forEach((c) =>
+      lineas.push(`  📁 ${c.nombre}: ${c.canales.map((x) => x.nombre).join(", ")}`)
+    );
+    lineas.push(`Módulos: ${plan.modulos.join(", ")}`);
+    lineas.push("", "En Discord usa /construir-aplicar para crearlo o /construir-deshacer para revertir.");
+    $("#plan-resultado").textContent = lineas.join("\n");
+    $("#estructura").textContent = plan.categorias
+      .map((c) => `📁 ${c.nombre}\n` + c.canales.map((x) => `   # ${x.nombre}`).join("\n"))
+      .join("\n");
+  } catch (e) {
+    $("#plan-resultado").textContent = "Error: " + e.message;
+  }
+}
+
+async function añadirDoc() {
+  const titulo = $("#doc-titulo").value.trim();
+  const contenido = $("#doc-contenido").value.trim();
+  if (!titulo || !contenido) return alert("Falta título o contenido.");
+  const servidorId = localStorage.getItem("servidor_id") || "0";
+  try {
+    await api(`/servidores/${servidorId}/conocimiento`, {
+      method: "PUT",
+      body: JSON.stringify({ titulo, contenido }),
+    });
+    $("#doc-titulo").value = "";
+    $("#doc-contenido").value = "";
+    cargarDocs();
+  } catch (e) {
+    alert("No se pudo guardar: " + e.message);
+  }
+}
+
+// Navegación por pestañas
+document.querySelectorAll(".tabs button").forEach((boton) => {
+  boton.addEventListener("click", () => {
+    document.querySelectorAll(".tabs button").forEach((b) => b.classList.remove("activo"));
+    boton.classList.add("activo");
+    document.querySelectorAll(".tab").forEach((t) => t.classList.add("oculto"));
+    document.getElementById(`tab-${boton.dataset.tab}`).classList.remove("oculto");
+  });
+});
+
+$("#btn-plan").addEventListener("click", proponerPlan);
+$("#btn-doc").addEventListener("click", añadirDoc);
+
+// Login: enlace OAuth2 de Discord
+const CLIENT_ID = localStorage.getItem("discord_client_id") || "";
+if (CLIENT_ID) {
+  $("#btn-discord").href =
+    `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}` +
+    `&response_type=code&redirect_uri=${encodeURIComponent(location.origin + "/auth/callback.html")}` +
+    `&scope=identify%20guilds`;
+} else {
+  $("#btn-discord").href = "#";
+  $("#btn-discord").addEventListener("click", () =>
+    alert("Configura DISCORD_CLIENT_ID en la API. Ver docs/despliegue.md")
+  );
+}
+
+if (TOKEN) {
+  mostrar("vista-panel");
+  pintarModulos();
+  revisarEstado();
+  cargarModulos();
+  cargarDocs();
+} else {
+  mostrar("vista-login");
+  revisarEstado();
+}

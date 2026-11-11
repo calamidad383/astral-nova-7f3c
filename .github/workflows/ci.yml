@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: |
+          pip install -r bot/requirements.txt -r api/requirements.txt -r tests/requirements.txt
+      - name: Pruebas
+        run: pytest -v
+
+  pwa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verificar PWA
+        run: |
+          node -e "
+          const fs = require('fs');
+          for (const f of ['app/index.html', 'app/app.js', 'app/styles.css', 'app/manifest.webmanifest']) {
+            if (!fs.existsSync(f)) { console.error('Falta ' + f); process.exit(1); }
+          }
+          JSON.parse(fs.readFileSync('app/manifest.webmanifest', 'utf8'));
+          new Function(fs.readFileSync('app/app.js', 'utf8'));
+          console.log('PWA OK');
+          "

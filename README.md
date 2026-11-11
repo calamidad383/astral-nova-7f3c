@@ -1,6 +1,8 @@
 # Plataforma IA para Discord — Guía v3 + Parte V4 (versión masiva)
 
-> Esta guía reemplaza a la v1 y a la v2. Al final incluye la **PARTE V4 — Superior a los gigantes**: análisis competitivo, superpoderes, novedades de Discord 2025–2026 y estrategia de precios para ganar. Describe una **plataforma completa**: una app que se descarga e instala en cada sistema, se conecta al Discord del usuario y, con ayuda de la IA, **crea y administra todo el servidor**. Incluye cómo se ve cada pantalla, el catálogo completo de módulos (todo lo que hacen los bots populares y más), la parte de IA, el cobro con PayPal, cómo compilar para cada plataforma y cómo darle fama. Está escrita para dársela a ChatGPT y construirla por fases.
+> Esta guía reemplaza a la v1 y a la v2. Al final incluye la **PARTE V4 — Superior a los gigantes**: análisis competitivo, superpoderes, novedades de Discord 2025–2026 y estrategia de precios para ganar.
+>
+> **El código de la Fase 1 (MVP) ya está en este repositorio**: `bot/` (bot de Discord con 10 módulos y constructor de servidores con IA), `ia/` (cerebro Gemini + RAG con citas), `api/` (API FastAPI con PayPal), `app/` (PWA instalable) y `tests/`. Guía de arranque en `docs/despliegue.md` y progreso en `ESTADO.md`. Describe una **plataforma completa**: una app que se descarga e instala en cada sistema, se conecta al Discord del usuario y, con ayuda de la IA, **crea y administra todo el servidor**. Incluye cómo se ve cada pantalla, el catálogo completo de módulos (todo lo que hacen los bots populares y más), la parte de IA, el cobro con PayPal, cómo compilar para cada plataforma y cómo darle fama. Está escrita para dársela a ChatGPT y construirla por fases.
 
 ---
 
