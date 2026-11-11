@@ -2,113 +2,16 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0B0D12">
-<title>NEXO — Panel de tu servidor</title>
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="styles.css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nuevo proyecto</title>
+<style>
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #0B0D12; color: #E8EAF2; font: 16px/1.6 system-ui, sans-serif; text-align: center; }
+</style>
 </head>
 <body>
-<div id="aviso-actualizacion" class="oculto">
-  <span>🆕 <strong>Nueva versión disponible</strong> — <span id="notas-version"></span></span>
-  <button id="btn-actualizar" class="boton principal">Actualizar ahora</button>
-</div>
-<header class="topbar">
-  <div class="brand"><span class="logo">✦</span> NEXO</div>
-  <span id="usuario-conectado" class="pill"></span>
-  <span id="estado-api" class="pill">conectando…</span>
-</header>
-
-<main id="vista-login" class="centro oculto">
-  <div class="tarjeta">
-    <h1>Convierte la IA en el administrador de tu servidor</h1>
-    <p>Dile qué comunidad quieres y la IA monta y administra todo: roles, canales, reglas, tickets y módulos.</p>
-    <a id="btn-discord" class="boton principal" href="#">Iniciar sesión con Discord</a>
-    <p class="nota">Se abrirá Discord en tu navegador; autoriza y volverás aquí con tu sesión lista. En la app del teléfono, la página te dará un código de acceso para pegar abajo.</p>
-    <p class="nota">¿Ya iniciaste sesión y tienes un código de acceso? Pégalo aquí:</p>
-    <input id="codigo-acceso" placeholder="Código de acceso">
-    <button class="boton" onclick="entrarConCodigo()">Entrar con código</button>
-  </div>
+<main>
+  <h1>✦ Nuevo proyecto</h1>
+  <p>Empezando desde cero. Algo nuevo viene en camino.</p>
 </main>
-
-<main id="vista-panel" class="oculto">
-  <nav class="tabs">
-    <button data-tab="inicio" class="activo">Inicio</button>
-    <button data-tab="servidor">Servidor</button>
-    <button data-tab="ia">IA</button>
-    <button data-tab="modulos">Módulos</button>
-    <button data-tab="negocio">Negocio</button>
-    <button data-tab="cuenta">Cuenta</button>
-  </nav>
-
-  <section id="tab-inicio" class="tab">
-    <div class="rejilla">
-      <div class="tarjeta"><h3>Servidores</h3><div id="lista-servidores">Cargando…</div></div>
-      <div class="tarjeta"><h3>Estado</h3><div id="estado-detalle">—</div></div>
-      <div class="tarjeta ancho"><h3>Constructor con IA</h3>
-        <textarea id="descripcion-comunidad" placeholder="Ej.: servidor para mi comunidad de trading educativo, 200 miembros, tono amable, en español"></textarea>
-        <button id="btn-plan" class="boton principal">Proponer plan con IA</button>
-        <pre id="plan-resultado" class="salida">El plan aparecerá aquí.</pre>
-      </div>
-    </div>
-  </section>
-
-  <section id="tab-servidor" class="tab oculto">
-    <div class="rejilla">
-      <div class="tarjeta ancho"><h3>Estructura propuesta</h3><div id="estructura">Aplica un plan del constructor para ver la estructura.</div></div>
-    </div>
-  </section>
-
-  <section id="tab-ia" class="tab oculto">
-    <div class="rejilla">
-      <div class="tarjeta ancho"><h3>Base de conocimiento</h3>
-        <input id="doc-titulo" placeholder="Título (ej.: FAQ de pagos)">
-        <textarea id="doc-contenido" placeholder="Contenido del documento; la IA responderá citando este documento"></textarea>
-        <button id="btn-doc" class="boton principal">Añadir documento</button>
-        <ul id="lista-docs"></ul>
-      </div>
-    </div>
-  </section>
-
-  <section id="tab-modulos" class="tab oculto">
-    <div class="rejilla" id="lista-modulos"></div>
-  </section>
-
-  <section id="tab-negocio" class="tab oculto">
-    <div id="candado-panel" class="tarjeta oculto">
-      <h3>🔒 Panel del dueño</h3>
-      <p>Escribe la contraseña para desbloquear tus ganancias y la seguridad.</p>
-      <input id="clave-panel" type="password" placeholder="Contraseña del panel">
-      <button class="boton principal" onclick="desbloquearPanel()">Desbloquear</button>
-    </div>
-    <div class="rejilla">
-      <div class="tarjeta"><h3>Ingresos totales</h3><p class="cifra" id="neg-ingresos">—</p></div>
-      <div class="tarjeta"><h3>Ventas</h3><p class="cifra" id="neg-ventas">—</p></div>
-      <div class="tarjeta"><h3>Reembolsos</h3><p class="cifra" id="neg-reembolsos">—</p></div>
-      <div class="tarjeta"><h3>Neto</h3><p class="cifra" id="neg-neto">—</p></div>
-    </div>
-    <div class="tarjeta"><h3>Por plan</h3><ul id="neg-planes" class="lista"></ul></div>
-    <div class="tarjeta"><h3>Últimas transacciones</h3><ul id="neg-transacciones" class="lista"></ul></div>
-    <div class="tarjeta"><h3>Ciberseguridad</h3><p id="seg-resumen">—</p><ul id="seg-eventos" class="lista"></ul></div>
-    <p id="neg-modo" class="nota oculto"></p>
-    <div class="tarjeta"><h3>PayPal real</h3><p>Sincroniza tus transacciones reales de PayPal (sin webhooks ni dominio).</p><button id="btn-sincronizar" class="boton principal">Sincronizar PayPal ahora</button><p id="sincro-resultado"></p></div>
-  </section>
-
-  <section id="tab-cuenta" class="tab oculto">
-    <div class="rejilla">
-      <div class="tarjeta"><h3>Sesión</h3><p id="cuenta-usuario">—</p><button id="btn-salir" class="boton">Cerrar sesión</button></div>
-      <div class="tarjeta"><h3>Servidor de datos (opcional)</h3>
-        <p>La app funciona completa en modo local. Si despliegas el servidor del bot, pega aquí su dirección (https://…).</p>
-        <input id="input-servidor" placeholder="https://tu-servidor.example.com">
-        <button id="btn-servidor-guardar" class="boton principal">Guardar servidor</button>
-      </div>
-      <div class="tarjeta"><h3>Plan</h3><p>Gratis · constructor con límite · IA con límite diario.</p><button class="boton">Mejorar plan (PayPal)</button></div>
-      <div class="tarjeta"><h3>Privacidad</h3><p>Puedes exportar o eliminar tus datos cuando quieras (ver PRIVACY.md).</p></div>
-    </div>
-  </section>
-</main>
-
-<footer class="pie">Código abierto · <a href="https://github.com/calamidad383/astral-nova-7f3c">repositorio</a> · <span id="version-pie"></span></footer>
-<script src="app.js"></script>
 </body>
 </html>
