@@ -83,6 +83,8 @@ li { padding: 8px 0; border-bottom: 1px solid #232839; font-size: 14px; }
 .pie { text-align: center; color: var(--texto-suave); font-size: 12px; padding: 16px; }
 .pie a { color: var(--texto-suave); }
 
+.cifra { font-size: 32px; font-weight: 700; background: linear-gradient(135deg, var(--acento1), var(--acento2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
 .oculto { display: none; }
 
 @media (max-width: 600px) {

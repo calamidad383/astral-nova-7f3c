@@ -1,6 +1,7 @@
-"""Capa de IA de la plataforma: cerebro (Gemini), RAG con citas, prompts y evaluaciones."""
+"""Capa de IA de la plataforma: motor propio local (sin APIs externas), RAG con citas, prompts y evaluaciones."""
 
-from .cerebro import Cerebro, RespuestaIA, extraer_json, plan_por_defecto
+from .cerebro import Cerebro, RespuestaIA
+from .motor import MotorLocal
 from .rag import Fragmento, RAG
 
-__all__ = ["Cerebro", "RespuestaIA", "Fragmento", "RAG", "extraer_json", "plan_por_defecto"]
+__all__ = ["Cerebro", "RespuestaIA", "MotorLocal", "Fragmento", "RAG"]

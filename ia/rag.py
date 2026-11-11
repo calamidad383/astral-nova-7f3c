@@ -88,6 +88,13 @@ class RAG:
             ).fetchall()
         return [Fragmento(**dict(fila)) for fila in filas]
 
+    def listar_todos(self) -> list[Fragmento]:
+        with self._conectar() as con:
+            filas = con.execute(
+                "SELECT id, servidor_id, titulo, contenido FROM conocimiento"
+            ).fetchall()
+        return [Fragmento(**dict(fila)) for fila in filas]
+
     def buscar(self, servidor_id: str, pregunta: str, limite: int = 3) -> list[Fragmento]:
         palabras = set(tokenizar(pregunta))
         resultados: list[tuple[float, Fragmento]] = []

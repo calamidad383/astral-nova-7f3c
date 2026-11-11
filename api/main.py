@@ -24,11 +24,13 @@ import httpx
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from ia import Cerebro, RAG
 from bot import constructor
 from bot.db import BaseDatos
+from api.seguridad import Seguridad
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
@@ -43,7 +45,8 @@ app.add_middleware(
 
 DB = BaseDatos(os.environ.get("DATABASE_PATH", "data/plataforma.db"))
 RAG_DB = RAG(os.environ.get("DATABASE_PATH", "data/plataforma.db"))
-CEREBRO = Cerebro(RAG_DB)
+CEREBRO = Cerebro(RAG_DB, os.environ.get("DATABASE_PATH", "data/plataforma.db"))
+SEGURIDAD = Seguridad(os.environ.get("DATABASE_PATH", "data/plataforma.db"))
 
 DISCORD_API = "https://discord.com/api/v10"
 
@@ -90,6 +93,22 @@ async def sesion_actual(request: Request) -> dict:
 @app.on_event("startup")
 async def al_arrancar():
     await DB.inicializar()
+    await DB.inicializar_negocio()
+
+
+@app.middleware("http")
+async def escudo_seguridad(request: Request, call_next):
+    ip = request.client.host if request.client else "desconocida"
+    if SEGURIDAD.esta_baneada(ip):
+        return JSONResponse({"error": "Acceso bloqueado permanentemente"}, status_code=403)
+    if not SEGURIDAD.permitir(ip):
+        SEGURIDAD.registrar_evento("rate_limit", ip, "Exceso de peticiones")
+        return JSONResponse({"error": "Demasiadas peticiones"}, status_code=429)
+    respuesta = await call_next(request)
+    respuesta.headers["X-Content-Type-Options"] = "nosniff"
+    respuesta.headers["X-Frame-Options"] = "DENY"
+    respuesta.headers["Referrer-Policy"] = "no-referrer"
+    return respuesta
 
 
 # ---------------------------------------------------------------- estado
@@ -106,7 +125,7 @@ async def estado():
 # ---------------------------------------------------------------- auth
 
 @app.post("/auth/discord")
-async def auth_discord(datos: CodigoOAuth):
+async def auth_discord(datos: CodigoOAuth, request: Request):
     if not os.environ.get("DISCORD_CLIENT_SECRET"):
         raise HTTPException(503, "OAuth2 de Discord no configurado en el servidor")
     async with httpx.AsyncClient(timeout=30) as client:
@@ -121,7 +140,9 @@ async def auth_discord(datos: CodigoOAuth):
             },
         )
         if r.status_code != 200:
-            raise HTTPException(400, "Código OAuth2 inválido")
+            ip = request.client.host if request.client else ""
+            baneado = SEGURIDAD.registrar_intento_fallido(ip)
+            raise HTTPException(400, "Código OAuth2 inválido" + (" · IP baneada permanentemente" if baneado else ""))
         token = r.json()
         r_usuario = await client.get(
             f"{DISCORD_API}/users/@me",
@@ -186,6 +207,8 @@ async def deshacer_plan(servidor_id: str, sesion: dict = Depends(sesion_actual))
 MODULOS_VALIDOS = {
     "bienvenida", "moderacion", "anti_spam", "verificacion", "logs",
     "roles_botones", "encuestas", "tickets", "pregunta", "constructor",
+    "niveles", "sorteos", "sugerencias", "recordatorios", "anuncios",
+    "backups", "resumenes", "anti_nuke",
 }
 
 
@@ -238,6 +261,51 @@ async def analiticas(servidor_id: str, sesion: dict = Depends(sesion_actual)):
         "documentos_conocimiento": len(RAG_DB.listar(servidor_id)),
         "fase": "1 (analíticas completas en fase 2)",
     }
+
+
+# ---------------------------------------------------------------- seguridad (panel)
+
+@app.get("/seguridad/eventos")
+async def eventos_seguridad(sesion: dict = Depends(sesion_actual)):
+    return {"eventos": SEGURIDAD.eventos(), "bans": SEGURIDAD.bans()}
+
+
+@app.delete("/seguridad/bans/{ip}")
+async def desbanear_ip(ip: str, sesion: dict = Depends(sesion_actual)):
+    if not SEGURIDAD.desbanear(ip):
+        raise HTTPException(404, "Ban no encontrado")
+    return {"ok": True}
+
+
+# ---------------------------------------------------------------- negocio (panel del dueño)
+
+DATOS_EJEMPLO_NEGOCIO = [
+    {"servidor_id": "demo", "plan": "pro", "monto": 8.0, "tipo": "pago", "origen": "ejemplo"},
+    {"servidor_id": "demo", "plan": "pro", "monto": 8.0, "tipo": "pago", "origen": "ejemplo"},
+    {"servidor_id": "demo", "plan": "business", "monto": 30.0, "tipo": "pago", "origen": "ejemplo"},
+    {"servidor_id": "demo", "plan": "pro", "monto": 8.0, "tipo": "reembolso", "origen": "ejemplo"},
+]
+
+
+@app.get("/negocio/resumen")
+async def negocio_resumen(sesion: dict = Depends(sesion_actual), servidor_id: str | None = None):
+    resumen = await DB.resumen_negocio(servidor_id)
+    if not resumen["transacciones"] and not os.environ.get("PAYPAL_CLIENT_ID"):
+        for pago in DATOS_EJEMPLO_NEGOCIO:
+            await DB.registrar_pago(pago["servidor_id"], pago["plan"], pago["monto"], pago["tipo"], pago["origen"])
+        resumen = await DB.resumen_negocio(servidor_id)
+        resumen["modo"] = "ejemplo"
+    else:
+        resumen["modo"] = "real"
+    return resumen
+
+
+@app.post("/negocio/pago")
+async def negocio_registrar_pago(servidor_id: str, plan: str, monto: float, tipo: str = "pago", sesion: dict = Depends(sesion_actual)):
+    if tipo not in {"pago", "reembolso"}:
+        raise HTTPException(400, "Tipo debe ser pago o reembolso")
+    id_ = await DB.registrar_pago(servidor_id, plan, monto, tipo, origen="manual")
+    return {"id": id_}
 
 
 # ---------------------------------------------------------------- PayPal
@@ -303,9 +371,13 @@ async def paypal_webhook(request: Request):
         raise HTTPException(400, "Firma inválida")
 
     tipo = evento.get("event_type", "")
-    guild_id = (evento.get("resource") or {}).get("custom_id")
+    recurso = evento.get("resource") or {}
+    guild_id = recurso.get("custom_id")
     if tipo == "BILLING.SUBSCRIPTION.ACTIVATED" and guild_id:
         await DB.fijar_modulo(guild_id, "constructor", True)
+    elif tipo == "PAYMENT.SALE.COMPLETED" and guild_id:
+        monto = float((recurso.get("amount") or {}).get("total", 0) or 0)
+        await DB.registrar_pago(guild_id, "pro", monto, "pago", origen="paypal")
     elif tipo in {"BILLING.SUBSCRIPTION.CANCELLED", "BILLING.SUBSCRIPTION.SUSPENDED", "BILLING.SUBSCRIPTION.EXPIRED"} and guild_id:
         await DB.fijar_modulo(guild_id, "constructor", False)
     return {"ok": True}

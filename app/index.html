@@ -29,6 +29,7 @@
     <button data-tab="servidor">Servidor</button>
     <button data-tab="ia">IA</button>
     <button data-tab="modulos">Módulos</button>
+    <button data-tab="negocio">Negocio</button>
     <button data-tab="cuenta">Cuenta</button>
   </nav>
 
@@ -63,6 +64,18 @@
 
   <section id="tab-modulos" class="tab oculto">
     <div class="rejilla" id="lista-modulos"></div>
+  </section>
+
+  <section id="tab-negocio" class="tab oculto">
+    <div class="rejilla">
+      <div class="tarjeta"><h3>Ingresos totales</h3><p class="cifra" id="neg-ingresos">—</p></div>
+      <div class="tarjeta"><h3>Ventas</h3><p class="cifra" id="neg-ventas">—</p></div>
+      <div class="tarjeta"><h3>Reembolsos</h3><p class="cifra" id="neg-reembolsos">—</p></div>
+      <div class="tarjeta"><h3>Neto</h3><p class="cifra" id="neg-neto">—</p></div>
+    </div>
+    <div class="tarjeta"><h3>Por plan</h3><ul id="neg-planes" class="lista"></ul></div>
+    <div class="tarjeta"><h3>Últimas transacciones</h3><ul id="neg-transacciones" class="lista"></ul></div>
+    <div class="tarjeta"><h3>Ciberseguridad</h3><p id="seg-resumen">—</p><ul id="seg-eventos" class="lista"></ul></div>
   </section>
 
   <section id="tab-cuenta" class="tab oculto">

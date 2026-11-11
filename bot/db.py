@@ -60,6 +60,50 @@ CREATE TABLE IF NOT EXISTS registro_constructor (
     creado_en TEXT DEFAULT CURRENT_TIMESTAMP,
     deshecho INTEGER NOT NULL DEFAULT 0
 );
+
+CREATE TABLE IF NOT EXISTS pagos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    servidor_id TEXT NOT NULL,
+    plan TEXT NOT NULL,
+    monto REAL NOT NULL,
+    moneda TEXT NOT NULL DEFAULT 'USD',
+    tipo TEXT NOT NULL DEFAULT 'pago',
+    origen TEXT NOT NULL DEFAULT 'manual',
+    creado_en TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS niveles (
+    servidor_id TEXT NOT NULL,
+    usuario_id TEXT NOT NULL,
+    xp INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (servidor_id, usuario_id)
+);
+
+CREATE TABLE IF NOT EXISTS recordatorios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    servidor_id TEXT NOT NULL,
+    canal_id TEXT NOT NULL,
+    usuario_id TEXT NOT NULL,
+    texto TEXT NOT NULL,
+    cuando TEXT NOT NULL,
+    hecho INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS anuncios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    servidor_id TEXT NOT NULL,
+    canal_id TEXT NOT NULL,
+    texto TEXT NOT NULL,
+    cuando TEXT NOT NULL,
+    hecho INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS backups (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    servidor_id TEXT NOT NULL,
+    datos TEXT NOT NULL,
+    creado_en TEXT DEFAULT CURRENT_TIMESTAMP
+);
 """
 
 
@@ -157,3 +201,139 @@ class BaseDatos:
                 (servidor_id,),
             )
             await con.commit()
+
+    # ------------------------------------------------ negocio (panel del dueño)
+
+    async def inicializar_negocio(self) -> None:
+        pass  # las tablas ya se crean en inicializar()
+
+    async def registrar_pago(
+        self, servidor_id: str, plan: str, monto: float, tipo: str = "pago", origen: str = "manual", moneda: str = "USD"
+    ) -> int:
+        async with self._con() as con:
+            cur = await con.execute(
+                "INSERT INTO pagos (servidor_id, plan, monto, tipo, origen, moneda) VALUES (?, ?, ?, ?, ?, ?)",
+                (servidor_id, plan, monto, tipo, origen, moneda),
+            )
+            await con.commit()
+            return cur.lastrowid
+
+    async def resumen_negocio(self, servidor_id: str | None = None) -> dict:
+        async with self._con() as con:
+            con.row_factory = aiosqlite.Row
+            filtro = "WHERE servidor_id = ?" if servidor_id else ""
+            parametros = (servidor_id,) if servidor_id else ()
+            filas = await con.execute_fetchall(
+                f"SELECT tipo, plan, monto, moneda, creado_en FROM pagos {filtro} ORDER BY id DESC LIMIT 100",
+                parametros,
+            )
+        pagos = [dict(f) for f in filas]
+        ingresos = sum(p["monto"] for p in pagos if p["tipo"] == "pago")
+        reembolsos = sum(p["monto"] for p in pagos if p["tipo"] == "reembolso")
+        por_plan: dict[str, float] = {}
+        for p in pagos:
+            if p["tipo"] == "pago":
+                por_plan[p["plan"]] = por_plan.get(p["plan"], 0.0) + p["monto"]
+        return {
+            "ingresos_totales": round(ingresos, 2),
+            "reembolsos": round(reembolsos, 2),
+            "neto": round(ingresos - reembolsos, 2),
+            "ventas": sum(1 for p in pagos if p["tipo"] == "pago"),
+            "por_plan": por_plan,
+            "transacciones": pagos[:30],
+            "moneda": "USD",
+        }
+
+    # ------------------------------------------------ niveles
+
+    async def añadir_xp(self, servidor_id: str, usuario_id: str, cantidad: int) -> int:
+        async with self._con() as con:
+            await con.execute(
+                "INSERT INTO niveles (servidor_id, usuario_id, xp) VALUES (?, ?, ?) "
+                "ON CONFLICT(servidor_id, usuario_id) DO UPDATE SET xp = xp + ?",
+                (servidor_id, usuario_id, cantidad, cantidad),
+            )
+            await con.commit()
+            filas = await con.execute_fetchall(
+                "SELECT xp FROM niveles WHERE servidor_id = ? AND usuario_id = ?", (servidor_id, usuario_id)
+            )
+            return filas[0][0]
+
+    async def top_niveles(self, servidor_id: str, limite: int = 10) -> list[dict]:
+        async with self._con() as con:
+            con.row_factory = aiosqlite.Row
+            filas = await con.execute_fetchall(
+                "SELECT usuario_id, xp FROM niveles WHERE servidor_id = ? ORDER BY xp DESC LIMIT ?",
+                (servidor_id, limite),
+            )
+        return [dict(f) for f in filas]
+
+    # ------------------------------------------------ recordatorios y anuncios
+
+    async def crear_recordatorio(self, servidor_id: str, canal_id: str, usuario_id: str, texto: str, cuando: str) -> int:
+        async with self._con() as con:
+            cur = await con.execute(
+                "INSERT INTO recordatorios (servidor_id, canal_id, usuario_id, texto, cuando) VALUES (?, ?, ?, ?, ?)",
+                (servidor_id, canal_id, usuario_id, texto, cuando),
+            )
+            await con.commit()
+            return cur.lastrowid
+
+    async def recordatorios_pendientes(self, ahora_iso: str) -> list[dict]:
+        async with self._con() as con:
+            con.row_factory = aiosqlite.Row
+            filas = await con.execute_fetchall(
+                "SELECT * FROM recordatorios WHERE hecho = 0 AND cuando <= ?", (ahora_iso,)
+            )
+        return [dict(f) for f in filas]
+
+    async def marcar_recordatorio(self, id_: int) -> None:
+        async with self._con() as con:
+            await con.execute("UPDATE recordatorios SET hecho = 1 WHERE id = ?", (id_,))
+            await con.commit()
+
+    async def programar_anuncio(self, servidor_id: str, canal_id: str, texto: str, cuando: str) -> int:
+        async with self._con() as con:
+            cur = await con.execute(
+                "INSERT INTO anuncios (servidor_id, canal_id, texto, cuando) VALUES (?, ?, ?, ?)",
+                (servidor_id, canal_id, texto, cuando),
+            )
+            await con.commit()
+            return cur.lastrowid
+
+    async def anuncios_pendientes(self, ahora_iso: str) -> list[dict]:
+        async with self._con() as con:
+            con.row_factory = aiosqlite.Row
+            filas = await con.execute_fetchall(
+                "SELECT * FROM anuncios WHERE hecho = 0 AND cuando <= ?", (ahora_iso,)
+            )
+        return [dict(f) for f in filas]
+
+    async def marcar_anuncio(self, id_: int) -> None:
+        async with self._con() as con:
+            await con.execute("UPDATE anuncios SET hecho = 1 WHERE id = ?", (id_,))
+            await con.commit()
+
+    # ------------------------------------------------ copias de seguridad
+
+    async def guardar_backup(self, servidor_id: str, datos: str) -> int:
+        async with self._con() as con:
+            cur = await con.execute("INSERT INTO backups (servidor_id, datos) VALUES (?, ?)", (servidor_id, datos))
+            await con.commit()
+            return cur.lastrowid
+
+    async def backups_de(self, servidor_id: str) -> list[dict]:
+        async with self._con() as con:
+            con.row_factory = aiosqlite.Row
+            filas = await con.execute_fetchall(
+                "SELECT id, creado_en FROM backups WHERE servidor_id = ? ORDER BY id DESC LIMIT 20", (servidor_id,)
+            )
+        return [dict(f) for f in filas]
+
+    async def obtener_backup(self, servidor_id: str, id_: int) -> dict | None:
+        async with self._con() as con:
+            con.row_factory = aiosqlite.Row
+            filas = await con.execute_fetchall(
+                "SELECT * FROM backups WHERE servidor_id = ? AND id = ?", (servidor_id, id_)
+            )
+        return dict(filas[0]) if filas else None

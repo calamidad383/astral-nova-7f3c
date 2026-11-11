@@ -22,7 +22,7 @@ from bot.db import BaseDatos  # noqa: E402
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("bot")
 
-COGS_FASE1 = [
+COGS = [
     "bot.cogs.bienvenida",
     "bot.cogs.moderacion",
     "bot.cogs.anti_spam",
@@ -33,6 +33,14 @@ COGS_FASE1 = [
     "bot.cogs.tickets",
     "bot.cogs.pregunta",
     "bot.cogs.constructor_cog",
+    "bot.cogs.niveles",
+    "bot.cogs.sorteos",
+    "bot.cogs.sugerencias",
+    "bot.cogs.recordatorios",
+    "bot.cogs.anuncios",
+    "bot.cogs.backups",
+    "bot.cogs.resumenes",
+    "bot.cogs.anti_nuke",
 ]
 
 
@@ -49,7 +57,8 @@ class PlataformaBot(commands.Bot):
 
     async def setup_hook(self) -> None:
         await self.db.inicializar()
-        for cog in COGS_FASE1:
+        await self.db.inicializar_negocio()
+        for cog in COGS:
             await self.load_extension(cog)
             log.info("Módulo cargado: %s", cog)
         await self.tree.sync()

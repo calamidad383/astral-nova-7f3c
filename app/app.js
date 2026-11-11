@@ -11,6 +11,14 @@ const NOMBRES_MODULOS = {
   tickets: "Tickets",
   pregunta: "IA /pregunta",
   constructor: "Constructor con IA",
+  niveles: "Niveles y XP",
+  sorteos: "Sorteos",
+  sugerencias: "Sugerencias",
+  recordatorios: "Recordatorios",
+  anuncios: "Anuncios programados",
+  backups: "Backups del servidor",
+  resumenes: "Resúmenes de chat",
+  anti_nuke: "Anti-nuke (cuarentena)",
 };
 
 const $ = (sel) => document.querySelector(sel);
@@ -141,6 +149,42 @@ async function proponerPlan() {
   }
 }
 
+async function cargarNegocio() {
+  try {
+    const res = await api("/negocio/resumen");
+    $("#neg-ingresos").textContent = "$" + res.ingresos_totales.toFixed(2);
+    $("#neg-ventas").textContent = res.ventas;
+    $("#neg-reembolsos").textContent = "$" + res.reembolsos.toFixed(2);
+    $("#neg-neto").textContent = "$" + res.neto.toFixed(2);
+    const planes = $("#neg-planes");
+    planes.innerHTML = "";
+    for (const [plan, cantidad] of Object.entries(res.por_plan || {})) {
+      const li = document.createElement("li");
+      li.textContent = `${plan}: ${cantidad}`;
+      planes.appendChild(li);
+    }
+    const trans = $("#neg-transacciones");
+    trans.innerHTML = "";
+    for (const t of res.transacciones || []) {
+      const li = document.createElement("li");
+      li.textContent = `${t.creado_en} · ${t.plan} · $${t.monto.toFixed(2)}${t.tipo === "reembolso" ? " (reembolso)" : ""}`;
+      trans.appendChild(li);
+    }
+    const seg = await api("/seguridad/eventos");
+    const eventos = seg.eventos || [];
+    $("#seg-resumen").textContent = `${eventos.length} eventos de seguridad registrados · ${seg.bans.length} IPs baneadas permanentemente`;
+    const lista = $("#seg-eventos");
+    lista.innerHTML = "";
+    for (const ev of eventos.slice(0, 10)) {
+      const li = document.createElement("li");
+      li.textContent = `${ev.creado_en} · ${ev.tipo} · ${ev.ip || "-"}`;
+      lista.appendChild(li);
+    }
+  } catch (e) {
+    $("#seg-resumen").textContent = "No disponible: " + e.message;
+  }
+}
+
 async function añadirDoc() {
   const titulo = $("#doc-titulo").value.trim();
   const contenido = $("#doc-contenido").value.trim();
@@ -192,6 +236,7 @@ if (TOKEN) {
   revisarEstado();
   cargarModulos();
   cargarDocs();
+  cargarNegocio();
 } else {
   mostrar("vista-login");
   revisarEstado();
