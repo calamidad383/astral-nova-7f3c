@@ -1,0 +1,65 @@
+name: releases
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  escritorio:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+          - os: macos-latest
+            target: aarch64-apple-darwin
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - name: Instalar tauri-cli
+        run: cargo install tauri-cli --version "^2" --locked
+      - name: Generar iconos de plataforma
+        run: cargo tauri icon src-tauri/icons/icon.png
+      - name: Compilar y publicar
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: src-tauri
+          tagName: ${{ github.ref_name }}
+          releaseName: "NEXO Panel ${{ github.ref_name }}"
+          releaseDraft: false
+          args: --target ${{ matrix.target }}
+
+  android:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+      - name: Instalar tauri-cli
+        run: cargo install tauri-cli --version "^2" --locked
+      - name: Generar iconos de plataforma
+        run: cargo tauri icon src-tauri/icons/icon.png
+      - name: Iniciar proyecto Android
+        run: cargo tauri android init
+      - name: Compilar APK
+        run: cargo tauri android build --apk --target aarch64
+      - name: Publicar APK en la release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: src-tauri/gen/android/app/build/outputs/apk/universal/release/*.apk

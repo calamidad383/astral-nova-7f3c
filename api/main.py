@@ -208,7 +208,7 @@ MODULOS_VALIDOS = {
     "bienvenida", "moderacion", "anti_spam", "verificacion", "logs",
     "roles_botones", "encuestas", "tickets", "pregunta", "constructor",
     "niveles", "sorteos", "sugerencias", "recordatorios", "anuncios",
-    "backups", "resumenes", "anti_nuke",
+    "backups", "resumenes", "anti_nuke", "tienda",
 }
 
 
@@ -298,6 +298,23 @@ async def negocio_resumen(sesion: dict = Depends(sesion_actual), servidor_id: st
     else:
         resumen["modo"] = "real"
     return resumen
+
+
+@app.get("/servidores/{servidor_id}/tienda")
+async def listar_tienda(servidor_id: str, sesion: dict = Depends(sesion_actual)):
+    productos = await DB.productos_de(servidor_id)
+    ventas = await DB.ventas_tienda_de(servidor_id)
+    return {"productos": productos, "ventas": ventas, "cobrado": sum(v["monto"] for v in ventas if v["estado"] == "pagada")}
+
+
+@app.post("/servidores/{servidor_id}/tienda")
+async def añadir_producto_tienda(servidor_id: str, datos: dict, sesion: dict = Depends(sesion_actual)):
+    nombre = str(datos.get("nombre", "")).strip()[:100]
+    precio = round(float(datos.get("precio", 0)), 2)
+    if not nombre or precio < 0.5:
+        raise HTTPException(400, "Nombre y precio (mínimo 0.5) obligatorios")
+    id_ = await DB.añadir_producto(servidor_id, nombre, str(datos.get("descripcion", ""))[:500], precio, str(datos.get("entrega", ""))[:300])
+    return {"id": id_}
 
 
 @app.post("/negocio/pago")

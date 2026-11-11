@@ -61,6 +61,37 @@ CREATE TABLE IF NOT EXISTS registro_constructor (
     deshecho INTEGER NOT NULL DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS productos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    servidor_id TEXT NOT NULL,
+    nombre TEXT NOT NULL,
+    descripcion TEXT NOT NULL DEFAULT '',
+    precio REAL NOT NULL,
+    entrega TEXT NOT NULL DEFAULT '',
+    activo INTEGER NOT NULL DEFAULT 1,
+    creado_en TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS codigos_descuento (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    servidor_id TEXT NOT NULL,
+    codigo TEXT NOT NULL,
+    porcentaje INTEGER NOT NULL,
+    usos INTEGER NOT NULL DEFAULT 0,
+    maximo_usos INTEGER NOT NULL DEFAULT 0,
+    UNIQUE (servidor_id, codigo)
+);
+
+CREATE TABLE IF NOT EXISTS ventas_tienda (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    servidor_id TEXT NOT NULL,
+    producto_id INTEGER NOT NULL,
+    comprador_id TEXT NOT NULL,
+    monto REAL NOT NULL,
+    estado TEXT NOT NULL DEFAULT 'pendiente',
+    creado_en TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS pagos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     servidor_id TEXT NOT NULL,
@@ -327,6 +358,95 @@ class BaseDatos:
             con.row_factory = aiosqlite.Row
             filas = await con.execute_fetchall(
                 "SELECT id, creado_en FROM backups WHERE servidor_id = ? ORDER BY id DESC LIMIT 20", (servidor_id,)
+            )
+        return [dict(f) for f in filas]
+
+    # ------------------------------------------------ tienda
+
+    async def añadir_producto(
+        self, servidor_id: str, nombre: str, descripcion: str, precio: float, entrega: str = ""
+    ) -> int:
+        async with self._con() as con:
+            cur = await con.execute(
+                "INSERT INTO productos (servidor_id, nombre, descripcion, precio, entrega) VALUES (?, ?, ?, ?, ?)",
+                (servidor_id, nombre, descripcion, precio, entrega),
+            )
+            await con.commit()
+            return cur.lastrowid
+
+    async def productos_de(self, servidor_id: str, solo_activos: bool = True) -> list[dict]:
+        async with self._con() as con:
+            con.row_factory = aiosqlite.Row
+            filtro = "WHERE servidor_id = ? AND activo = 1" if solo_activos else "WHERE servidor_id = ?"
+            filas = await con.execute_fetchall(
+                f"SELECT * FROM productos {filtro} ORDER BY id DESC", (servidor_id,)
+            )
+        return [dict(f) for f in filas]
+
+    async def producto(self, servidor_id: str, id_: int) -> dict | None:
+        async with self._con() as con:
+            con.row_factory = aiosqlite.Row
+            filas = await con.execute_fetchall(
+                "SELECT * FROM productos WHERE servidor_id = ? AND id = ?", (servidor_id, id_)
+            )
+        return dict(filas[0]) if filas else None
+
+    async def eliminar_producto(self, servidor_id: str, id_: int) -> bool:
+        async with self._con() as con:
+            cur = await con.execute(
+                "UPDATE productos SET activo = 0 WHERE servidor_id = ? AND id = ?", (servidor_id, id_)
+            )
+            await con.commit()
+            return cur.rowcount > 0
+
+    async def crear_codigo(self, servidor_id: str, codigo: str, porcentaje: int, maximo_usos: int = 0) -> int:
+        async with self._con() as con:
+            cur = await con.execute(
+                "INSERT OR REPLACE INTO codigos_descuento (servidor_id, codigo, porcentaje, maximo_usos) VALUES (?, ?, ?, ?)",
+                (servidor_id, codigo.upper(), porcentaje, maximo_usos),
+            )
+            await con.commit()
+            return cur.lastrowid
+
+    async def usar_codigo(self, servidor_id: str, codigo: str) -> int | None:
+        """Devuelve el porcentaje si el código es utilizable y registra el uso."""
+        async with self._con() as con:
+            con.row_factory = aiosqlite.Row
+            filas = await con.execute_fetchall(
+                "SELECT * FROM codigos_descuento WHERE servidor_id = ? AND codigo = ?",
+                (servidor_id, codigo.upper()),
+            )
+            if not filas:
+                return None
+            fila = dict(filas[0])
+            if fila["maximo_usos"] and fila["usos"] >= fila["maximo_usos"]:
+                return None
+            await con.execute(
+                "UPDATE codigos_descuento SET usos = usos + 1 WHERE servidor_id = ? AND codigo = ?",
+                (servidor_id, codigo.upper()),
+            )
+            await con.commit()
+            return fila["porcentaje"]
+
+    async def registrar_venta_tienda(self, servidor_id: str, producto_id: int, comprador_id: str, monto: float) -> int:
+        async with self._con() as con:
+            cur = await con.execute(
+                "INSERT INTO ventas_tienda (servidor_id, producto_id, comprador_id, monto) VALUES (?, ?, ?, ?)",
+                (servidor_id, producto_id, comprador_id, monto),
+            )
+            await con.commit()
+            return cur.lastrowid
+
+    async def marcar_venta_pagada(self, id_: int) -> None:
+        async with self._con() as con:
+            await con.execute("UPDATE ventas_tienda SET estado = 'pagada' WHERE id = ?", (id_,))
+            await con.commit()
+
+    async def ventas_tienda_de(self, servidor_id: str) -> list[dict]:
+        async with self._con() as con:
+            con.row_factory = aiosqlite.Row
+            filas = await con.execute_fetchall(
+                "SELECT * FROM ventas_tienda WHERE servidor_id = ? ORDER BY id DESC LIMIT 100", (servidor_id,)
             )
         return [dict(f) for f in filas]
 

@@ -41,6 +41,7 @@ COGS = [
     "bot.cogs.backups",
     "bot.cogs.resumenes",
     "bot.cogs.anti_nuke",
+    "bot.cogs.tienda",
 ]
 
 

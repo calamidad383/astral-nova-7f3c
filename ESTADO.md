@@ -8,13 +8,16 @@
 - [x] **IA local y autocontenida** (`ia/motor.py`): sin APIs externas ni claves. Índice TF-IDF sobre la base de conocimiento de cada servidor, aprendizaje por retroalimentación persistido en SQLite (`ia_aprendizaje`), clasificador de toxicidad con normalización leetspeak, patrones anti-scam, clasificador de intenciones admin, plantillas de comunidad (gaming/academia/negocio/trading/creador) y resumidor extractivo. `ia/cerebro.py` es la fachada asíncrona.
 - [x] RAG con citas (`ia/rag.py`), prompts y evaluaciones (`ia/prompts.py`, `ia/evaluaciones.py`)
 - [x] Constructor de servidores: validar/aplicar/deshacer, plantillas de permisos (nunca Administrador), reversible
-- [x] Bot con **18 módulos**: bienvenida, moderación, anti-spam, verificación, logs, roles por botones, encuestas, tickets, `/pregunta` con citas, constructor, **niveles, sorteos, sugerencias, recordatorios, anuncios programados, backups, resúmenes, anti-nuke con cuarentena**
+- [x] Bot con **19 módulos**: bienvenida, moderación, anti-spam, verificación, logs, roles por botones, encuestas, tickets, `/pregunta` con citas, constructor, **niveles, sorteos, sugerencias, recordatorios, anuncios programados, backups, resúmenes, anti-nuke con cuarentena, tienda con PayPal**
+- [x] **Tienda** (`bot/cogs/tienda.py` + API): productos con panel de compra por botones, códigos de descuento con límite de usos, registro de ventas; compite con Shopify para comunidades (sin web externa ni $29/mes)
+- [x] **Empaquetado multiplataforma** (Tauri v2 en `src-tauri/`): releases automáticas en GitHub Actions al crear un tag `v*` — instalador de Windows, APK de Android, macOS y Linux; iOS pendiente de cuenta de desarrollador Apple; la PWA ya cubre todos los dispositivos mientras tanto
+- [x] **Guía de Hostinger** (`docs/hostinger.md`) + script de instalación automática (`scripts/instalar-hostinger.sh`) con HTTPS (Caddy)
 - [x] **Ciberseguridad** (`api/seguridad.py` + escudo en `api/main.py`): bans permanentes de IP (5 logins fallidos en 15 min → ban para siempre), rate limiting, cabeceras de seguridad, registro de eventos visible en el panel, endpoint para desbanear manualmente
 - [x] **Panel de negocio del dueño**: tabla `pagos`, `/negocio/resumen` (ingresos, ventas, reembolsos, neto, por plan, transacciones; modo ejemplo si no hay PayPal), `/negocio/pago` manual, webhook PayPal registra pagos reales
 - [x] **PWA con pestaña Negocio**: cifras de ingresos/ventas/reembolsos/neto, desglose por plan, últimas transacciones y resumen de seguridad; instalable en Android/iOS/escritorio (manifest + service worker)
 - [x] API FastAPI completa (auth OAuth2, servidores, constructor, módulos, conocimiento, analíticas, facturación, webhook PayPal con verificación de firma, negocio, seguridad)
 - [x] Docker (bot + API) y CI en GitHub Actions (pytest + verificación de la PWA)
-- [x] Pruebas: 30 tests (`tests/test_fase1.py` + `tests/test_motor_local.py`): constructor, RAG, motor local (preguntas con citas, moderación, planes, resúmenes, aprendizaje persistente) y seguridad (ban permanente)
+- [x] Pruebas: 32 tests (`tests/test_fase1.py` + `tests/test_motor_local.py` + `tests/test_tienda.py`): constructor, RAG, motor local, seguridad y ciclo completo de tienda
 - [x] `README.md` original (guía v3+V4) eliminado según instrucción del dueño; la siguiente especificación llegará como archivo nuevo que se leerá completo
 
 ### Credenciales recibidas (guardadas SOLO en `.env`, fuera de git)

@@ -19,6 +19,7 @@ const NOMBRES_MODULOS = {
   backups: "Backups del servidor",
   resumenes: "Resúmenes de chat",
   anti_nuke: "Anti-nuke (cuarentena)",
+  tienda: "Tienda (PayPal)",
 };
 
 const $ = (sel) => document.querySelector(sel);
