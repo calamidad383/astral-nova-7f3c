@@ -17,8 +17,15 @@
 - [x] Pruebas: 30 tests (`tests/test_fase1.py` + `tests/test_motor_local.py`): constructor, RAG, motor local (preguntas con citas, moderación, planes, resúmenes, aprendizaje persistente) y seguridad (ban permanente)
 - [x] `README.md` original (guía v3+V4) eliminado según instrucción del dueño; la siguiente especificación llegará como archivo nuevo que se leerá completo
 
+### Credenciales recibidas (guardadas SOLO en `.env`, fuera de git)
+- [x] DISCORD_TOKEN verificado contra la API de Discord (bot: NEXO, id 1553129631287218236)
+- [x] PayPal client_id/secret verificados: son de SANDBOX (entorno de pruebas); PAYPAL_BASE apuntado a sandbox
+- [x] Distribución decidida: las apps se descargarán desde GitHub Releases por dispositivo (Android/iOS/escritorio); cuenta de desarrollador Apple/Google aplazada hasta que el dueño pague
+
 ### Pendiente
 - [ ] **Sección 2 de la app**: esperando archivo nuevo que subirá el dueño al repositorio (se leerá completito y todo su contenido será la actualización a aplicar)
+- [ ] Faltan del dueño: DISCORD_CLIENT_ID + DISCORD_CLIENT_SECRET (OAuth2 del panel), PAYPAL_WEBHOOK_ID, decisión de hosting y dominio
+- [ ] Recomendado: rotar el token de Discord y el secreto de PayPal (se compartieron por chat)
 - [ ] Conectar API ↔ bot por cola de tareas: aplicar/deshacer desde el panel
 - [ ] Empaquetado de escritorio/móvil nativo (la PWA ya es instalable; empaquetar con Tauri/Flutter si se quiere binario para Windows)
 - [ ] PayPal real: crear suscripciones con plan_id reales cuando el dueño entregue credenciales
