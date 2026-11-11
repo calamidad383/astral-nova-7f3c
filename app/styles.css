@@ -58,9 +58,13 @@ main { flex: 1; padding: 20px; max-width: 980px; width: 100%; margin: 0 auto; }
 
 input, textarea {
   width: 100%; margin: 6px 0; padding: 10px 12px; border-radius: 10px;
-  border: 1px solid #2a3040; background: #0f1320; color: var(--texto); font: inherit;
+  border: 1px solid #2a3040; background: #0f1320; color: var(--texto); font: inherit; font-size: 16px;
 }
 textarea { min-height: 90px; resize: vertical; }
+
+.boton { touch-action: manipulation; }
+
+#neg-modo { color: var(--aviso); margin: 10px 0; }
 
 .salida { background: #0f1320; border-radius: 10px; padding: 12px; margin-top: 10px; white-space: pre-wrap; font-size: 13px; color: var(--texto-suave); min-height: 40px; }
 
@@ -89,7 +93,20 @@ li { padding: 8px 0; border-bottom: 1px solid #232839; font-size: 14px; }
 
 @media (max-width: 600px) {
   .tarjeta h1 { font-size: 22px; }
-  main { padding: 12px; }
+  main { padding: 12px 12px 96px; }
+  .topbar { flex-wrap: wrap; gap: 6px; padding: 10px 14px; }
+  .pill { max-width: 46vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tabs {
+    position: fixed; bottom: 0; left: 0; right: 0; margin: 0;
+    background: var(--superficie); border-top: 1px solid #232839;
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+    gap: 2px; z-index: 20;
+  }
+  .tabs button { flex: 1; padding: 10px 4px; font-size: 12.5px; white-space: nowrap; border-radius: 10px; }
+  .rejilla { grid-template-columns: 1fr; }
+  .cifra { font-size: 26px; }
+  .boton { width: 100%; text-align: center; }
+  .modulo-fila .interruptor { flex-shrink: 0; }
 }
 
 #aviso-actualizacion {

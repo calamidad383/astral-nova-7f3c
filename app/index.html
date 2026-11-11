@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0B0D12">
-<title>Astral — Panel de tu servidor</title>
+<title>NEXO — Panel de tu servidor</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -14,7 +14,7 @@
   <button id="btn-actualizar" class="boton principal">Actualizar ahora</button>
 </div>
 <header class="topbar">
-  <div class="brand"><span class="logo">✦</span> Astral</div>
+  <div class="brand"><span class="logo">✦</span> NEXO</div>
   <span id="usuario-conectado" class="pill"></span>
   <span id="estado-api" class="pill">conectando…</span>
 </header>
@@ -90,18 +90,25 @@
     <div class="tarjeta"><h3>Por plan</h3><ul id="neg-planes" class="lista"></ul></div>
     <div class="tarjeta"><h3>Últimas transacciones</h3><ul id="neg-transacciones" class="lista"></ul></div>
     <div class="tarjeta"><h3>Ciberseguridad</h3><p id="seg-resumen">—</p><ul id="seg-eventos" class="lista"></ul></div>
+    <p id="neg-modo" class="nota oculto"></p>
     <div class="tarjeta"><h3>PayPal real</h3><p>Sincroniza tus transacciones reales de PayPal (sin webhooks ni dominio).</p><button id="btn-sincronizar" class="boton principal">Sincronizar PayPal ahora</button><p id="sincro-resultado"></p></div>
   </section>
 
   <section id="tab-cuenta" class="tab oculto">
     <div class="rejilla">
+      <div class="tarjeta"><h3>Sesión</h3><p id="cuenta-usuario">—</p><button id="btn-salir" class="boton">Cerrar sesión</button></div>
+      <div class="tarjeta"><h3>Servidor de datos (opcional)</h3>
+        <p>La app funciona completa en modo local. Si despliegas el servidor del bot, pega aquí su dirección (https://…).</p>
+        <input id="input-servidor" placeholder="https://tu-servidor.example.com">
+        <button id="btn-servidor-guardar" class="boton principal">Guardar servidor</button>
+      </div>
       <div class="tarjeta"><h3>Plan</h3><p>Gratis · constructor con límite · IA con límite diario.</p><button class="boton">Mejorar plan (PayPal)</button></div>
       <div class="tarjeta"><h3>Privacidad</h3><p>Puedes exportar o eliminar tus datos cuando quieras (ver PRIVACY.md).</p></div>
     </div>
   </section>
 </main>
 
-<footer class="pie">Código abierto · <a href="https://github.com/calamidad383/astral-nova-7f3c">repositorio</a> · v0.1</footer>
+<footer class="pie">Código abierto · <a href="https://github.com/calamidad383/astral-nova-7f3c">repositorio</a> · <span id="version-pie"></span></footer>
 <script src="app.js"></script>
 </body>
 </html>

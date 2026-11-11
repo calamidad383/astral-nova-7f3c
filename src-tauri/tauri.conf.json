@@ -1,12 +1,13 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "NEXO Panel",
-  "version": "0.2.6",
+  "version": "0.3.0",
   "identifier": "com.nexo.panel",
   "build": {
     "frontendDist": "../app"
   },
   "app": {
+    "withGlobalTauri": true,
     "windows": [
       {
         "title": "NEXO — Panel de control",

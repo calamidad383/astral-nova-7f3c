@@ -1,5 +1,5 @@
-const CACHE = "nexo-v0.4";
-const ARCHIVOS = ["./", "./index.html", "./callback.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./icono.svg"];
+const CACHE = "nexo-v0.5";
+const ARCHIVOS = ["./", "./index.html", "./callback.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./icono.svg", "./icono-192.png", "./icono-512.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ARCHIVOS)));
@@ -23,10 +23,17 @@ self.addEventListener("message", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
-  if (e.request.method !== "GET" || new URL(e.request.url).pathname.startsWith("/servidores") || new URL(e.request.url).pathname.startsWith("/auth")) {
-    return;
-  }
+  if (e.request.method !== "GET") return;
+  let url;
+  try { url = new URL(e.request.url); } catch { return; }
+  if (url.origin !== location.origin) return;
   e.respondWith(
-    caches.match(e.request).then((respuesta) => respuesta || fetch(e.request))
+    fetch(e.request)
+      .then((respuesta) => {
+        const copia = respuesta.clone();
+        caches.open(CACHE).then((c) => c.put(e.request, copia));
+        return respuesta;
+      })
+      .catch(() => caches.match(e.request).then((r) => r || caches.match("./")))
   );
 });
