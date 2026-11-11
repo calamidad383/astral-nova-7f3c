@@ -1,6 +1,6 @@
-# Plataforma IA para Discord — Guía v3 (versión masiva)
+# Plataforma IA para Discord — Guía v3 + Parte V4 (versión masiva)
 
-> Esta guía reemplaza a la v1 y a la v2. Describe una **plataforma completa**: una app que se descarga e instala en cada sistema, se conecta al Discord del usuario y, con ayuda de la IA, **crea y administra todo el servidor**. Incluye cómo se ve cada pantalla, el catálogo completo de módulos (todo lo que hacen los bots populares y más), la parte de IA, el cobro con PayPal, cómo compilar para cada plataforma y cómo darle fama. Está escrita para dársela a ChatGPT y construirla por fases.
+> Esta guía reemplaza a la v1 y a la v2. Al final incluye la **PARTE V4 — Superior a los gigantes**: análisis competitivo, superpoderes, novedades de Discord 2025–2026 y estrategia de precios para ganar. Describe una **plataforma completa**: una app que se descarga e instala en cada sistema, se conecta al Discord del usuario y, con ayuda de la IA, **crea y administra todo el servidor**. Incluye cómo se ve cada pantalla, el catálogo completo de módulos (todo lo que hacen los bots populares y más), la parte de IA, el cobro con PayPal, cómo compilar para cada plataforma y cómo darle fama. Está escrita para dársela a ChatGPT y construirla por fases.
 
 ---
 
@@ -764,3 +764,119 @@ Las opciones cambian según el plan y la fecha. Revísalas en la configuración 
 - Contratar el hosting cuando haya ingresos.
 - Pagar la cuenta de desarrollador de Apple, si decides distribuir en iPhone.
 - Grabar y publicar los videos
+
+---
+
+# PARTE V4 — Superior a los gigantes
+
+> Esta parte amplía la guía v3 con una investigación de internet (febrero de 2026): análisis de la competencia, los superpoderes que ningún bot tiene hoy, las novedades de la plataforma de Discord que hay que aprovechar y la estrategia para ganar. Todo lo demás de la v3 sigue vigente; esta parte lo eleva de nivel.
+
+---
+
+## 18. Análisis de la competencia (investigado en internet)
+
+### 18.1 Los gigantes y sus precios reales
+
+| Bot | Precio Premium | Fortalezas | Debilidades |
+|---|---|---|---|
+| **MEE6** | ~$11.95/mes por servidor | Niveles, ecosistema de plugins, marca conocida | Monetización agresiva (lo esencial va a Premium), IA muy básica, desarrollo lento |
+| **Dyno** | ~$4.99/mes por servidor | Moderación estable, tickets gratis, logs | Sin IA en ningún plan, niveles solo Premium, dashboard anticuado |
+| **Carl-bot** | ~$7.99/mes por servidor | Reaction roles ilimitadas gratis, automod granular | Sin IA, niveles solo Premium, configuración compleja |
+| **ProBot** | ~$4.99/mes por servidor | Imágenes de bienvenida, 10M+ servidores, todo-en-uno | IA limitada, sin app móvil |
+| **PeakBot** | ~$8.25/mes (Pro) | El competidor directo: AI Server Builder, 30+ funciones gratis, moderación por intención | Nuevo, sin marca, sin anti-nuke especializado |
+| **Wick** | ~$5/mes | Anti-nuke y anti-raid especialista, cuarentena | Solo seguridad, premium para lo importante |
+| **Beemo** | $4.99/mes (Max) | Anti-raid gratuito para siempre | Solo anti-raid |
+| **Ticket Tool** | Premium variable | Tickets especializados | Solo tickets |
+| **Xenon** | Premium variable | Copias de seguridad | Solo backups |
+| **Arcane** | Premium variable | Niveles | Solo niveles |
+| **YAGPDB** | Gratis (con scripting) | Automatización con scripts propios | Requiere saber programar |
+| **CommunityOne** | ~$14.99/mes | IA de preguntas y respuestas + analíticas | Caro, sin el resto del stack |
+
+### 18.2 Debilidades compartidas por TODOS los gigantes
+
+Esta es la lista de lo que **ninguno** hace hoy. Cada punto es una ventaja competitiva:
+
+1. **Ninguno construye el servidor completo con IA** (PeakBot se acerca con su AI Server Builder, pero no administra después de crear).
+2. **Ninguno tiene un agente autónomo 24/7** con ciclo observar → proponer → actuar (con aprobación humana) → informar.
+3. **Ninguno tiene app móvil nativa**: todos obligan a usar un dashboard web viejo.
+4. **Ninguno tiene base de conocimiento por servidor (RAG)**: la IA de MEE6 responde con lo que le pongas en la personalidad, sin documentos ni fuentes.
+5. **Ninguno hace anti-nuke con IA**: Wick y compañía usan reglas y umbrales fijos, fáciles de burlar con comportamiento lento.
+6. **Ninguno da analíticas predictivas**: muestran gráficos del pasado, nadie predice abandono de miembros ni recomienda la mejor hora para anunciar.
+7. **Ninguno responde con citas**: cuando un bot responde una pregunta, no dice de qué documento sacó la respuesta.
+8. **Casi ninguno es de código abierto**: la comunidad no puede verificar qué hacen con sus datos.
+9. **Ninguno usa las novedades de 2025–2026 de Discord** (Components V2, onboarding nativo, Server Shop, Activities).
+10. **Cobran por servidor y por función**: precios que se multiplican si usas varios bots (el stack típico MEE6 + Carl-bot + Ticket Tool + Wick pasa de $25/mes).
+
+---
+
+## 19. Los 15 superpoderes (cómo superarlos)
+
+1. **Constructor + administrador en uno:** la IA no solo crea el servidor (sección 6 de la v3); lo sigue administrando: detecta problemas, propone mejoras y las aplica con aprobación.
+2. **Agente autónomo con ciclo completo:** cada hora revisa el servidor (nuevos miembros, cola de moderación, salud) y publica un informe accionable: "3 spammers bloqueados, sugiero activar slowmode en #general los fines de semana".
+3. **Anti-nuke con IA:** aprende la línea base de comportamiento de cada admin y bot; si algo se sale de la línea (aunque sea lento), entra en **modo cuarentena**: congela roles peligrosos, avisa a los dueños por todos los canales y ofrece **restauración automática** desde la última copia de seguridad.
+4. **Respuestas con citas:** `/pregunta` responde y cita la fuente exacta ("Según FAQ-pagos.md, sección 2"). Si no hay fuente, lo dice y deriva a un humano.
+5. **Copiloto de moderación explicable:** cada sugerencia de la IA viene con el motivo ("insulto + contexto de discusión previa, sugerencia: advertencia, no baneo"). Un botón acepta o rechaza, y el rechazo entrena la cola de revisión.
+6. **Analíticas predictivas:** predicción de abandono de miembros, detección de canales muertos, mejor hora para publicar anuncios según actividad real, y comparación contra servidores similares (anónima).
+7. **Onboarding nativo con IA:** usa la API de onboarding de Discord para que los nuevos miembros elijan roles e intereses antes de entrar al chat, con preguntas generadas por la IA del servidor.
+8. **Interfaz de 2026 en Discord:** Components V2 (contenedores, secciones, galerías) para tickets, paneles y reglas que se ven modernos, no embeds viejos.
+9. **Panel DENTRO de Discord:** una Activity con el Embedded App SDK que abre el panel de administración sin salir de Discord (y con compras nativas en fase 4).
+10. **App móvil nativa de verdad:** los gigantes no la tienen. La app Flutter de la v3 es la diferencia más visible.
+11. **Gratis generoso:** el plan gratis incluye más que el Premium de Dyno y Carl-bot. La fama del "gratis mejor que el pago de los demás" es el motor de crecimiento.
+12. **Un solo precio simple:** Pro a $7–9/mes por servidor, por debajo de MEE6, con todo incluido. Sin multiplicar cobros por función.
+13. **Código abierto verificable:** PRIVACY.md, SECURITY.md, lanzamientos con hash SHA-256 y auditoría pública. La confianza es un arma contra bots cerrados.
+14. **Multi-idioma real:** la IA responde en el idioma de cada usuario automáticamente; el panel en español e inglés desde el día 1 (los gigantes son inglés-primero).
+15. **Seguridad por defecto:** plantillas de permisos mínimos, 2FA exigida al staff, alertas de permisos peligrosos y verificación de que ningún rol creado por la IA tenga Administrador.
+
+---
+
+## 20. Novedades de la plataforma de Discord (2025–2026) que hay que aprovechar
+
+> Investigado en el change log oficial de Discord y en las notas de discord.py. Verificar siempre la documentación vigente antes de implementar.
+
+1. **Components V2:** nuevos componentes de mensajes (contenedores, secciones, texto, galerías de medios, separadores) soportados por discord.py moderno. Se usan en tickets, paneles de roles y reglas.
+2. **Onboarding nativo de servidores:** la API permite configurar el flujo de bienvenida oficial de Discord (prompts de roles y canales). El constructor con IA debe configurarlo además de los canales.
+3. **Permisos nuevos:** `PIN_MESSAGES` se separó de `MANAGE_MESSAGES` (agosto de 2025) y en febrero de 2026 hubo más divisiones de permisos. Revisar las plantillas de permisos tras cada cambio.
+4. **Verificación de apps:** el umbral pasó de 100 servidores a **10.000 usuarios únicos** (desde junio de 2026), con 90 días para aplicar y reaplicación anual. Planificar la verificación al acercarse al umbral.
+5. **Ofuscación de canales ocultos:** desde el 16 de noviembre de 2026 los bots reciben los canales que no pueden ver como `___hidden___` con la marca `CHANNEL_OBFUSCATED`. El bot y la app deben manejar esto (no asumir que la lista de canales está completa).
+6. **Cifrado E2EE en llamadas (DAVE):** obligatorio desde marzo de 2026. El bot no puede escuchar llamadas de voz: la moderación de voz se limita a texto, estados y señales de la API.
+7. **Server Shop y Server Subscriptions:** monetización nativa de Discord para servidores (roles de pago y productos). Requiere dueño 18+, 2FA, servidor de comunidad y, por ahora, banco en EE.UU. (Discord se queda el 10%). El módulo VIP de la v3 puede apoyarse aquí donde esté disponible, y en PayPal donde no.
+8. **Activities y Embedded App SDK:** las Activities ya están abiertas a todos los desarrolladores, con compras nativas (IAP) mediante SKUs y entitlements. El panel dentro de Discord (superpoder 9) y los minijuegos se construyen aquí.
+9. **Guild tags (grupos principales):** los servidores pueden tener etiqueta de gremio visible en el perfil. El constructor puede sugerir configurarla.
+10. **Eventos de auditoría de reordenamiento:** nuevos eventos de audit log para cambios de posición de canales y roles; el módulo de logs debe registrarlos.
+
+---
+
+## 21. Módulos nuevos de alto nivel (se añaden al catálogo de la v3)
+
+| Módulo | Qué hace | Plan | Fase |
+|---|---|---|---|
+| Anti-nuke IA | Línea base de comportamiento, cuarentena automática, restauración desde backup | P | 2 |
+| Respuestas con citas | Toda respuesta de IA cita su fuente en la base de conocimiento | G | 1 |
+| Detección de estafas | Enlaces de phishing, scams de cripto, suplantación de admins y de Discord | G | 2 |
+| Detección de cuentas alt | Heurísticas de edad de cuenta, patrones de entrada y comportamiento | P | 2 |
+| Panel dentro de Discord | Activity con el panel de administración (Embedded App SDK) | P | 3 |
+| Onboarding IA | Configura el onboarding nativo de Discord con preguntas generadas | P | 2 |
+| Analíticas predictivas | Predicción de abandono, mejor hora para anuncios, canales muertos | P | 3 |
+| Traducción de canales en vivo | Un canal que muestra todo traducido al idioma de cada usuario | P | 3 |
+| Informe ejecutivo semanal | Resumen con métricas + 3 acciones recomendadas, en DM al dueño | P | 2 |
+
+---
+
+## 22. Estrategia de precios para ganar
+
+- **Gratis:** moderación base, anti-spam, verificación, logs, tickets, bienvenida, encuestas, `/pregunta` con citas y límite diario, constructor 1 vez por servidor. **Más que el Premium de Dyno o Carl-bot.**
+- **Pro ($7–9/mes por servidor):** todo lo anterior sin límites, anti-raid, anti-nuke IA, resúmenes, analíticas predictivas, copias de seguridad, app móvil completa, panel dentro de Discord. **Por debajo de MEE6 ($11.95).**
+- **Business ($25–35/mes):** marca blanca, multi-servidor con descuento, embudo de ventas, VIP, soporte prioritario.
+- **Regla de oro:** nunca cobrar por función suelta ni por reacción. Un precio, todo incluido.
+- **Cobro:** PayPal (sección 10 de la v3) desde la fase 1; compras nativas de Discord (IAP de Activities) en fase 4 donde esté disponible.
+
+---
+
+## 23. Fuentes consultadas (investigación de internet)
+
+- Comparativas de bots 2026: MEE6 vs Dyno vs Carl-bot (DiscordCraft, PeakBot, April Bot, Skywork), guía de mejores bots de CommunityOne.
+- Precios oficiales: MEE6 ~$11.95/mes, Dyno ~$4.99/mes, Carl-bot ~$7.99/mes, ProBot ~$4.99/mes, PeakBot Pro ~$8.25/mes, Wick ~$5/mes, CommunityOne ~$14.99/mes.
+- Change log oficial de desarrolladores de Discord (Components V2, permisos, DAVE, verificación, ofuscación de canales, guild tags).
+- Notas de discord.py (soporte de Components V2, onboarding, guild tags).
+- Monetización de Discord: Server Shop, Server Subscriptions, IAP para Activities, Embedded App SDK (documentación oficial y guías de creadores).
+- Análisis de seguridad: guías anti-nuke 2026 (Wick, Beemo, Security Bot) y tendencias de moderación con agentes de IA.
