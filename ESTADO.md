@@ -17,6 +17,8 @@
 - [x] **Ciberseguridad** (`api/seguridad.py` + escudo en `api/main.py`): bans permanentes de IP (5 logins fallidos en 15 min → ban para siempre), rate limiting, cabeceras de seguridad, registro de eventos visible en el panel, endpoint para desbanear manualmente
 - [x] **Panel de negocio del dueño**: tabla `pagos`, `/negocio/resumen` (ingresos, ventas, reembolsos, neto, por plan, transacciones; modo ejemplo si no hay PayPal), `/negocio/pago` manual, webhook PayPal registra pagos reales
 - [x] **Sincronización PayPal SIN webhooks** (`/negocio/sincronizar-paypal` + botón en el panel): consulta la API de transacciones de PayPal con las credenciales y registra pagos/reembolsos reales con deduplicación — verificado en vivo contra sandbox; no necesita dominio ni URL pública
+- [x] **Panel del dueño protegido con contraseña** (`PANEL_PASSWORD`, por defecto `Shadow`): los endpoints de negocio y seguridad exigen la clave; la app muestra candado y se desbloquea con un input
+- [x] **APK universal con las 4 arquitecturas** (arm64, armv7 32 bits, x86, x86_64): compatible con todos los teléfonos existentes, incluidos los que corren Android en 32 bits (ej. ZTE Blade A36)
 - [x] **PWA con pestaña Negocio**: cifras de ingresos/ventas/reembolsos/neto, desglose por plan, últimas transacciones y resumen de seguridad; instalable en Android/iOS/escritorio (manifest + service worker)
 - [x] API FastAPI completa (auth OAuth2, servidores, constructor, módulos, conocimiento, analíticas, facturación, webhook PayPal con verificación de firma, negocio, seguridad)
 - [x] Docker (bot + API) y CI en GitHub Actions (pytest + verificación de la PWA)

@@ -23,7 +23,7 @@ from pathlib import Path
 
 import httpx
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -88,6 +88,18 @@ async def sesion_actual(request: Request) -> dict:
     sesion = _TOKENS_SESION.get(token)
     if not sesion:
         raise HTTPException(401, "Sesión inválida o expirada")
+    return sesion
+
+
+CLAVE_PANEL = os.environ.get("PANEL_PASSWORD", "Shadow")
+
+
+def panel_protegido(
+    sesion: dict = Depends(sesion_actual), x_panel_clave: str = Header(default="")
+) -> dict:
+    """El panel del dueño (negocio y seguridad) exige la clave secreta."""
+    if x_panel_clave != CLAVE_PANEL:
+        raise HTTPException(401, "Clave del panel incorrecta")
     return sesion
 
 
@@ -267,12 +279,12 @@ async def analiticas(servidor_id: str, sesion: dict = Depends(sesion_actual)):
 # ---------------------------------------------------------------- seguridad (panel)
 
 @app.get("/seguridad/eventos")
-async def eventos_seguridad(sesion: dict = Depends(sesion_actual)):
+async def eventos_seguridad(sesion: dict = Depends(panel_protegido)):
     return {"eventos": SEGURIDAD.eventos(), "bans": SEGURIDAD.bans()}
 
 
 @app.delete("/seguridad/bans/{ip}")
-async def desbanear_ip(ip: str, sesion: dict = Depends(sesion_actual)):
+async def desbanear_ip(ip: str, sesion: dict = Depends(panel_protegido)):
     if not SEGURIDAD.desbanear(ip):
         raise HTTPException(404, "Ban no encontrado")
     return {"ok": True}
@@ -289,7 +301,7 @@ DATOS_EJEMPLO_NEGOCIO = [
 
 
 @app.get("/negocio/resumen")
-async def negocio_resumen(sesion: dict = Depends(sesion_actual), servidor_id: str | None = None):
+async def negocio_resumen(sesion: dict = Depends(panel_protegido), servidor_id: str | None = None):
     resumen = await DB.resumen_negocio(servidor_id)
     if not resumen["transacciones"] and not os.environ.get("PAYPAL_CLIENT_ID"):
         for pago in DATOS_EJEMPLO_NEGOCIO:
@@ -319,7 +331,7 @@ async def añadir_producto_tienda(servidor_id: str, datos: dict, sesion: dict = 
 
 
 @app.post("/negocio/pago")
-async def negocio_registrar_pago(servidor_id: str, plan: str, monto: float, tipo: str = "pago", sesion: dict = Depends(sesion_actual)):
+async def negocio_registrar_pago(servidor_id: str, plan: str, monto: float, tipo: str = "pago", sesion: dict = Depends(panel_protegido)):
     if tipo not in {"pago", "reembolso"}:
         raise HTTPException(400, "Tipo debe ser pago o reembolso")
     id_ = await DB.registrar_pago(servidor_id, plan, monto, tipo, origen="manual")
@@ -402,7 +414,7 @@ async def paypal_webhook(request: Request):
 
 
 @app.post("/negocio/sincronizar-paypal")
-async def sincronizar_paypal(sesion: dict = Depends(sesion_actual)):
+async def sincronizar_paypal(sesion: dict = Depends(panel_protegido)):
     """Trae las transacciones reales de PayPal SIN webhooks ni dominio.
 
     Consulta la API de búsqueda de transacciones (últimos 31 días) y registra

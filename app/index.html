@@ -71,6 +71,12 @@
   </section>
 
   <section id="tab-negocio" class="tab oculto">
+    <div id="candado-panel" class="tarjeta oculto">
+      <h3>🔒 Panel del dueño</h3>
+      <p>Escribe la contraseña para desbloquear tus ganancias y la seguridad.</p>
+      <input id="clave-panel" type="password" placeholder="Contraseña del panel">
+      <button class="boton principal" onclick="desbloquearPanel()">Desbloquear</button>
+    </div>
     <div class="rejilla">
       <div class="tarjeta"><h3>Ingresos totales</h3><p class="cifra" id="neg-ingresos">—</p></div>
       <div class="tarjeta"><h3>Ventas</h3><p class="cifra" id="neg-ventas">—</p></div>

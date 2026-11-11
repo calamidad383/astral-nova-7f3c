@@ -68,8 +68,8 @@ jobs:
         run: cargo tauri icon src-tauri/icons/icon.png
       - name: Iniciar proyecto Android
         run: cargo tauri android init
-      - name: Compilar APK
-        run: cargo tauri android build --apk --target aarch64
+      - name: Compilar APK universal (todas las arquitecturas)
+        run: cargo tauri android build --apk
       - name: Firmar APK
         run: |
           BUILD_TOOLS=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)

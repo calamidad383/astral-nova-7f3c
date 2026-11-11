@@ -1,5 +1,5 @@
 
-const VERSION_APP = "0.2.2";
+const VERSION_APP = "0.2.4";
 const URL_VERSIONES = "https://calamidad383.github.io/astral-nova-7f3c/version.json";
 const URL_RELEASES = "https://github.com/calamidad383/astral-nova-7f3c/releases/latest";
 
@@ -64,17 +64,32 @@ function mostrar(vista) {
   }
 }
 
+const CLAVE_PANEL = localStorage.getItem("clave_panel") || "";
+
 async function api(ruta, opciones = {}) {
   const r = await fetch(API + ruta, {
     ...opciones,
     headers: {
       "Content-Type": "application/json",
       ...(TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {}),
+      ...(CLAVE_PANEL ? { "X-Panel-Clave": CLAVE_PANEL } : {}),
       ...(opciones.headers || {}),
     },
   });
-  if (!r.ok) throw new Error(`${r.status} ${await r.text()}`);
+  if (!r.ok) {
+    if (r.status === 401 && ruta.startsWith("/negocio")) {
+      document.getElementById("candado-panel").classList.remove("oculto");
+    }
+    throw new Error(`${r.status} ${await r.text()}`);
+  }
   return r.json();
+}
+
+function desbloquearPanel() {
+  const clave = document.getElementById("clave-panel").value;
+  if (!clave) return alert("Escribe la contraseña del panel.");
+  localStorage.setItem("clave_panel", clave);
+  location.reload();
 }
 
 async function revisarEstado() {
