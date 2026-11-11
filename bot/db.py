@@ -238,6 +238,11 @@ class BaseDatos:
     async def inicializar_negocio(self) -> None:
         pass  # las tablas ya se crean en inicializar()
 
+    async def pago_ya_registrado(self, origen: str) -> bool:
+        async with self._con() as con:
+            fila = await con.execute_fetchall("SELECT 1 FROM pagos WHERE origen = ? LIMIT 1", (origen,))
+        return bool(fila)
+
     async def registrar_pago(
         self, servidor_id: str, plan: str, monto: float, tipo: str = "pago", origen: str = "manual", moneda: str = "USD"
     ) -> int:

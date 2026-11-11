@@ -14,6 +14,7 @@
 - [x] **Guía de Hostinger** (`docs/hostinger.md`) + script de instalación automática (`scripts/instalar-hostinger.sh`) con HTTPS (Caddy)
 - [x] **Ciberseguridad** (`api/seguridad.py` + escudo en `api/main.py`): bans permanentes de IP (5 logins fallidos en 15 min → ban para siempre), rate limiting, cabeceras de seguridad, registro de eventos visible en el panel, endpoint para desbanear manualmente
 - [x] **Panel de negocio del dueño**: tabla `pagos`, `/negocio/resumen` (ingresos, ventas, reembolsos, neto, por plan, transacciones; modo ejemplo si no hay PayPal), `/negocio/pago` manual, webhook PayPal registra pagos reales
+- [x] **Sincronización PayPal SIN webhooks** (`/negocio/sincronizar-paypal` + botón en el panel): consulta la API de transacciones de PayPal con las credenciales y registra pagos/reembolsos reales con deduplicación — verificado en vivo contra sandbox; no necesita dominio ni URL pública
 - [x] **PWA con pestaña Negocio**: cifras de ingresos/ventas/reembolsos/neto, desglose por plan, últimas transacciones y resumen de seguridad; instalable en Android/iOS/escritorio (manifest + service worker)
 - [x] API FastAPI completa (auth OAuth2, servidores, constructor, módulos, conocimiento, analíticas, facturación, webhook PayPal con verificación de firma, negocio, seguridad)
 - [x] Docker (bot + API) y CI en GitHub Actions (pytest + verificación de la PWA)
@@ -28,7 +29,7 @@
 
 ### Pendiente
 - [ ] **Sección 2 de la app**: esperando archivo nuevo que subirá el dueño al repositorio (se leerá completito y todo su contenido será la actualización a aplicar)
-- [ ] Faltan del dueño: PAYPAL_WEBHOOK_ID, decisión de hosting y dominio
+- [ ] Faltan del dueño: decisión de hosting (Hostinger de pago u Oracle Cloud gratis) y dominio opcional; el Webhook ID ya NO es necesario (hay sincronización directa)
 - [ ] Archivo "Mira la instrucción" subido a main pero VACÍO: esperando contenido (será la sección 2 de la app)
 - [ ] Recomendado: rotar el token de Discord y el secreto de PayPal (se compartieron por chat)
 - [ ] Conectar API ↔ bot por cola de tareas: aplicar/deshacer desde el panel

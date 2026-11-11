@@ -186,6 +186,18 @@ async function cargarNegocio() {
   }
 }
 
+async function sincronizarPayPal() {
+  const salida = $("#sincro-resultado");
+  salida.textContent = "Sincronizando…";
+  try {
+    const r = await api("/negocio/sincronizar-paypal", { method: "POST" });
+    salida.textContent = `✅ ${r.nuevos} nuevas · cobrado $${r.cobrado.toFixed(2)} · devuelto $${r.devuelto.toFixed(2)}`;
+    cargarNegocio();
+  } catch (e) {
+    salida.textContent = "No se pudo sincronizar: " + e.message;
+  }
+}
+
 async function añadirDoc() {
   const titulo = $("#doc-titulo").value.trim();
   const contenido = $("#doc-contenido").value.trim();
@@ -238,6 +250,7 @@ if (TOKEN) {
   cargarModulos();
   cargarDocs();
   cargarNegocio();
+  document.getElementById("btn-sincronizar").addEventListener("click", sincronizarPayPal);
 } else {
   mostrar("vista-login");
   revisarEstado();

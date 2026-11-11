@@ -2,6 +2,10 @@
 
 Objetivo: bot + API + panel funcionando 24/7 en un VPS de Hostinger con HTTPS automático.
 
+## Opción GRATIS ($0 al mes): Oracle Cloud Always Free
+
+Si aún no quieres pagar Hostinger, [oracle.com/cloud/free](https://www.oracle.com/cloud/free/) ofrece un VPS gratuito PARA SIEMPRE (ARM, 4 núcleos, 24 GB RAM). Mismo proceso de esta guía: Ubuntu 24.04, IP pública, y el mismo script de instalación. Los pagos NO dependen del servidor: el botón "Sincronizar PayPal" del panel trae las transacciones reales sin webhooks.
+
 ## 0. Lo que compras
 
 1. En [hostinger.com](https://www.hostinger.com) → **VPS** → plan **KVM 1** (el más barato sirve para empezar; 4 GB de RAM es lo cómodo).
@@ -74,7 +78,11 @@ El panel se abre en `http://LA_IP:8000/app/` (o `https://TU_DOMINIO/app/`): ahí
 cd plataforma && git pull && cd docker && docker compose up -d --build
 ```
 
-## 7. Mantenimiento
+## 7. PayPal: webhooks NO son necesarios
+
+El panel del dueño tiene el botón **"Sincronizar PayPal ahora"**: consulta la API de PayPal con tus credenciales y registra pagos y reembolsos reales sin webhook, sin dominio y sin URL pública. El webhook (`/paypal/webhook`) es opcional y solo vale la pena con dominio propio; su URL debe ser un dominio o IP válidos (por ejemplo `https://tudominio.com/paypal/webhook`), nunca un nombre suelto como `https://Carlos/...` — por eso PayPal rechazó ese intento.
+
+## 8. Mantenimiento
 
 - Backups: la base de datos vive en `plataforma/data/plataforma.db`; el hPanel de Hostinger permite snapshots del VPS (activa los semanales).
 - Si algo falla: `docker compose logs -f` muestra el error exacto.

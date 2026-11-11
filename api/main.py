@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import os
 import secrets
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import httpx
@@ -398,4 +399,57 @@ async def paypal_webhook(request: Request):
     elif tipo in {"BILLING.SUBSCRIPTION.CANCELLED", "BILLING.SUBSCRIPTION.SUSPENDED", "BILLING.SUBSCRIPTION.EXPIRED"} and guild_id:
         await DB.fijar_modulo(guild_id, "constructor", False)
     return {"ok": True}
+
+
+@app.post("/negocio/sincronizar-paypal")
+async def sincronizar_paypal(sesion: dict = Depends(sesion_actual)):
+    """Trae las transacciones reales de PayPal SIN webhooks ni dominio.
+
+    Consulta la API de búsqueda de transacciones (últimos 31 días) y registra
+    pagos y reembolsos evitando duplicados. Se puede llamar desde el panel
+    del dueño cuantas veces se quiera.
+    """
+    client_id = os.environ.get("PAYPAL_CLIENT_ID")
+    if not client_id:
+        raise HTTPException(503, "PayPal no configurado")
+    base = os.environ.get("PAYPAL_BASE", "https://api-m.sandbox.paypal.com")
+    fin = datetime.now(timezone.utc)
+    inicio = fin - timedelta(days=31)
+    async with httpx.AsyncClient(timeout=30) as client:
+        r = await client.post(
+            f"{base}/v1/oauth2/token",
+            data={"grant_type": "client_credentials"},
+            auth=(client_id, os.environ["PAYPAL_SECRET"]),
+        )
+        r.raise_for_status()
+        access = r.json()["access_token"]
+        t = await client.get(
+            f"{base}/v1/reporting/transactions",
+            headers={"Authorization": f"Bearer {access}"},
+            params={
+                "start_date": inicio.strftime("%Y-%m-%dT00:00:00-0000"),
+                "end_date": fin.strftime("%Y-%m-%dT%H:%M:%S-0000"),
+                "fields": "transaction_info",
+                "page_size": 100,
+            },
+        )
+        t.raise_for_status()
+    detalles = t.json().get("transaction_details", [])
+    nuevos, cobrado, devuelto = 0, 0.0, 0.0
+    for d in detalles:
+        info = d.get("transaction_info") or {}
+        txn = info.get("transaction_id") or ""
+        if not txn or info.get("transaction_status") != "S":
+            continue
+        monto = float((info.get("transaction_amount") or {}).get("value", "0") or 0)
+        if monto == 0 or await DB.pago_ya_registrado(f"paypal:{txn}"):
+            continue
+        tipo = "reembolso" if monto < 0 else "pago"
+        await DB.registrar_pago("paypal", "transaccion", abs(monto), tipo, origen=f"paypal:{txn}")
+        nuevos += 1
+        if tipo == "pago":
+            cobrado += abs(monto)
+        else:
+            devuelto += abs(monto)
+    return {"nuevos": nuevos, "consultadas": len(detalles), "cobrado": round(cobrado, 2), "devuelto": round(devuelto, 2)}
 
