@@ -1,6 +1,6 @@
 [package]
 name = "nexo-panel"
-version = "0.2.5"
+version = "0.2.6"
 description = "NEXO — Panel de control de la Plataforma IA para Discord"
 edition = "2021"
 

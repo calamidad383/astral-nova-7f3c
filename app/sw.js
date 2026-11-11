@@ -1,4 +1,4 @@
-const CACHE = "nexo-v0.3";
+const CACHE = "nexo-v0.4";
 const ARCHIVOS = ["./", "./index.html", "./callback.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./icono.svg"];
 
 self.addEventListener("install", (e) => {

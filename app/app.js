@@ -1,5 +1,5 @@
 
-const VERSION_APP = "0.2.5";
+const VERSION_APP = "0.2.6";
 const URL_VERSIONES = "https://calamidad383.github.io/astral-nova-7f3c/version.json";
 const URL_RELEASES = "https://github.com/calamidad383/astral-nova-7f3c/releases/latest";
 
@@ -278,19 +278,45 @@ document.querySelectorAll(".tabs button").forEach((boton) => {
 $("#btn-plan").addEventListener("click", proponerPlan);
 $("#btn-doc").addEventListener("click", añadirDoc);
 
-// Login: enlace OAuth2 de Discord
+// Login: OAuth2 implícito de Discord (sin servidor: Discord entrega el token directo)
 const CLIENT_ID = localStorage.getItem("discord_client_id") || "1553129631287218236";
 const REDIRECT_URI = "https://calamidad383.github.io/astral-nova-7f3c/callback.html";
 $("#btn-discord").href =
   `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}` +
-  `&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
-  `&scope=identify%20guilds&state=${encodeURIComponent(API)}`;
+  `&response_type=token&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
+  `&scope=identify%20guilds`;
 
-function entrarConCodigo() {
+async function usuarioDiscord(token) {
+  const r = await fetch("https://discord.com/api/v10/users/@me", {
+    headers: { "Authorization": "Bearer " + token },
+  });
+  if (!r.ok) throw new Error("código no válido (" + r.status + ")");
+  return r.json();
+}
+
+async function entrarConCodigo() {
   const codigo = $("#codigo-acceso").value.trim();
   if (!codigo) return alert("Pega el código de acceso que te dio la página de Discord.");
-  localStorage.setItem("token", codigo);
-  location.reload();
+  try {
+    const usuario = await usuarioDiscord(codigo);
+    localStorage.setItem("token", codigo);
+    localStorage.setItem("usuario", usuario.global_name || usuario.username);
+    location.reload();
+  } catch (e) {
+    alert("Ese código no funciona: " + e.message + ". Inicia sesión de nuevo con Discord.");
+  }
+}
+
+async function saludarUsuario() {
+  const nombre = localStorage.getItem("usuario");
+  const span = document.getElementById("usuario-conectado");
+  if (!span) return;
+  if (nombre) { span.textContent = "👤 " + nombre; return; }
+  try {
+    const usuario = await usuarioDiscord(TOKEN);
+    localStorage.setItem("usuario", usuario.global_name || usuario.username);
+    span.textContent = "👤 " + (usuario.global_name || usuario.username);
+  } catch {}
 }
 
 if (TOKEN) {
@@ -300,6 +326,7 @@ if (TOKEN) {
   cargarModulos();
   cargarDocs();
   cargarNegocio();
+  saludarUsuario();
   document.getElementById("btn-sincronizar").addEventListener("click", sincronizarPayPal);
   document.getElementById("btn-actualizar").addEventListener("click", actualizarAhora);
   revisarActualizacion();
