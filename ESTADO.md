@@ -19,6 +19,7 @@
 - [x] **Sincronización PayPal SIN webhooks** (`/negocio/sincronizar-paypal` + botón en el panel): consulta la API de transacciones de PayPal con las credenciales y registra pagos/reembolsos reales con deduplicación — verificado en vivo contra sandbox; no necesita dominio ni URL pública
 - [x] **Panel del dueño protegido con contraseña** (`PANEL_PASSWORD`, por defecto `Shadow`): los endpoints de negocio y seguridad exigen la clave; la app muestra candado y se desbloquea con un input
 - [x] **APK universal con las 4 arquitecturas** (arm64, armv7 32 bits, x86, x86_64): compatible con todos los teléfonos existentes, incluidos los que corren Android en 32 bits (ej. ZTE Blade A36)
+- [x] **Login con Discord reparado**: el botón no tenía Client ID ni existía la página de retorno; ahora hay `app/callback.html` (intercambia el código por sesión, guarda token en PWA y muestra código de acceso para pegar en el APK), `redirect_uri` fijo de GitHub Pages y campo para pegar el código en la app. Requiere añadir la URL de callback en el portal de Discord y el servidor en línea
 - [x] **PWA con pestaña Negocio**: cifras de ingresos/ventas/reembolsos/neto, desglose por plan, últimas transacciones y resumen de seguridad; instalable en Android/iOS/escritorio (manifest + service worker)
 - [x] API FastAPI completa (auth OAuth2, servidores, constructor, módulos, conocimiento, analíticas, facturación, webhook PayPal con verificación de firma, negocio, seguridad)
 - [x] Docker (bot + API) y CI en GitHub Actions (pytest + verificación de la PWA)

@@ -1,5 +1,5 @@
-const CACHE = "nexo-v0.2";
-const ARCHIVOS = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./icono.svg"];
+const CACHE = "nexo-v0.3";
+const ARCHIVOS = ["./", "./index.html", "./callback.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./icono.svg"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ARCHIVOS)));

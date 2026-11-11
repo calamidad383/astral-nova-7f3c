@@ -1,5 +1,5 @@
 
-const VERSION_APP = "0.2.4";
+const VERSION_APP = "0.2.5";
 const URL_VERSIONES = "https://calamidad383.github.io/astral-nova-7f3c/version.json";
 const URL_RELEASES = "https://github.com/calamidad383/astral-nova-7f3c/releases/latest";
 
@@ -279,17 +279,18 @@ $("#btn-plan").addEventListener("click", proponerPlan);
 $("#btn-doc").addEventListener("click", añadirDoc);
 
 // Login: enlace OAuth2 de Discord
-const CLIENT_ID = localStorage.getItem("discord_client_id") || "";
-if (CLIENT_ID) {
-  $("#btn-discord").href =
-    `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}` +
-    `&response_type=code&redirect_uri=${encodeURIComponent(location.origin + "/auth/callback.html")}` +
-    `&scope=identify%20guilds`;
-} else {
-  $("#btn-discord").href = "#";
-  $("#btn-discord").addEventListener("click", () =>
-    alert("Configura DISCORD_CLIENT_ID en la API. Ver docs/despliegue.md")
-  );
+const CLIENT_ID = localStorage.getItem("discord_client_id") || "1553129631287218236";
+const REDIRECT_URI = "https://calamidad383.github.io/astral-nova-7f3c/callback.html";
+$("#btn-discord").href =
+  `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}` +
+  `&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
+  `&scope=identify%20guilds&state=${encodeURIComponent(API)}`;
+
+function entrarConCodigo() {
+  const codigo = $("#codigo-acceso").value.trim();
+  if (!codigo) return alert("Pega el código de acceso que te dio la página de Discord.");
+  localStorage.setItem("token", codigo);
+  location.reload();
 }
 
 if (TOKEN) {

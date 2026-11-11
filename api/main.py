@@ -56,6 +56,7 @@ DISCORD_API = "https://discord.com/api/v10"
 
 class CodigoOAuth(BaseModel):
     codigo: str
+    redirect_uri: str | None = None
 
 
 class PlanEntrada(BaseModel):
@@ -149,7 +150,7 @@ async def auth_discord(datos: CodigoOAuth, request: Request):
                 "client_secret": os.environ["DISCORD_CLIENT_SECRET"],
                 "grant_type": "authorization_code",
                 "code": datos.codigo,
-                "redirect_uri": os.environ.get("DISCORD_REDIRECT_URI", "http://localhost:8000/auth/discord/callback"),
+                "redirect_uri": datos.redirect_uri or os.environ.get("DISCORD_REDIRECT_URI", "http://localhost:8000/auth/discord/callback"),
             },
         )
         if r.status_code != 200:
