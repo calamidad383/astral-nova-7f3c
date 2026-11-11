@@ -91,3 +91,16 @@ li { padding: 8px 0; border-bottom: 1px solid #232839; font-size: 14px; }
   .tarjeta h1 { font-size: 22px; }
   main { padding: 12px; }
 }
+
+#aviso-actualizacion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 20px;
+  background: linear-gradient(90deg, rgba(88, 101, 242, 0.18), rgba(124, 92, 255, 0.18));
+  border-bottom: 1px solid var(--borde, #2A2F3E);
+}
+
+#aviso-actualizacion.oculto { display: none; }

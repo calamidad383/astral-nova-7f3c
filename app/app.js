@@ -1,3 +1,37 @@
+
+const VERSION_APP = "0.2.0";
+const URL_VERSIONES = "https://calamidad383.github.io/astral-nova-7f3c/version.json";
+const URL_RELEASES = "https://github.com/calamidad383/astral-nova-7f3c/releases/latest";
+
+function versionMasNueva(a, b) {
+  const pa = a.split(".").map(Number), pb = b.split(".").map(Number);
+  for (let i = 0; i < 3; i++) {
+    if ((pb[i] || 0) > (pa[i] || 0)) return true;
+    if ((pb[i] || 0) < (pa[i] || 0)) return false;
+  }
+  return false;
+}
+
+async function revisarActualizacion() {
+  try {
+    const r = await fetch(URL_VERSIONES + "?t=" + Date.now());
+    const datos = await r.json();
+    if (!versionMasNueva(VERSION_APP, datos.version)) return;
+    $("#notas-version").textContent = datos.notas || "";
+    $("#aviso-actualizacion").classList.remove("oculto");
+  } catch {}
+}
+
+function actualizarAhora() {
+  localStorage.setItem("version_app", VERSION_APP);
+  if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage("actualizar");
+    setTimeout(() => location.reload(), 500);
+  } else {
+    window.open(URL_RELEASES, "_blank");
+  }
+}
+
 const API = localStorage.getItem("api_url") || "http://localhost:8000";
 const TOKEN = localStorage.getItem("token");
 const NOMBRES_MODULOS = {
@@ -251,6 +285,8 @@ if (TOKEN) {
   cargarDocs();
   cargarNegocio();
   document.getElementById("btn-sincronizar").addEventListener("click", sincronizarPayPal);
+  document.getElementById("btn-actualizar").addEventListener("click", actualizarAhora);
+  revisarActualizacion();
 } else {
   mostrar("vista-login");
   revisarEstado();

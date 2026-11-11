@@ -1,4 +1,4 @@
-const CACHE = "astral-v0.1";
+const CACHE = "nexo-v0.2";
 const ARCHIVOS = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./icono.svg"];
 
 self.addEventListener("install", (e) => {
@@ -13,6 +13,13 @@ self.addEventListener("activate", (e) => {
     )
   );
   self.clients.claim();
+});
+
+self.addEventListener("message", (e) => {
+  if (e.data === "actualizar") {
+    caches.keys().then((claves) => Promise.all(claves.map((k) => caches.delete(k))));
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener("fetch", (e) => {
