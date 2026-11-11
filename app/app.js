@@ -1,5 +1,5 @@
 
-const VERSION_APP = "0.2.0";
+const VERSION_APP = "0.2.2";
 const URL_VERSIONES = "https://calamidad383.github.io/astral-nova-7f3c/version.json";
 const URL_RELEASES = "https://github.com/calamidad383/astral-nova-7f3c/releases/latest";
 

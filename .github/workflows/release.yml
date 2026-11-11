@@ -65,7 +65,16 @@ jobs:
         run: cargo tauri android init
       - name: Compilar APK
         run: cargo tauri android build --apk --target aarch64
+      - name: Firmar APK
+        run: |
+          BUILD_TOOLS=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          echo "Build tools: $BUILD_TOOLS"
+          APK=$(ls src-tauri/gen/android/app/build/outputs/apk/universal/release/*.apk | head -1)
+          "$BUILD_TOOLS/zipalign" -f 4 "$APK" apk-alineado.apk
+          "$BUILD_TOOLS/apksigner" sign --ks scripts/nexo-firma.p12 --ks-type PKCS12 --ks-key-alias nexo --ks-pass pass:nexo2026 --key-pass pass:nexo2026 --out NEXO-Panel.apk apk-alineado.apk
+          "$BUILD_TOOLS/apksigner" verify NEXO-Panel.apk
+          echo "APK firmado y verificado"
       - name: Publicar APK en la release
         uses: softprops/action-gh-release@v2
         with:
-          files: src-tauri/gen/android/app/build/outputs/apk/universal/release/*.apk
+          files: NEXO-Panel.apk
