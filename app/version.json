@@ -1,1 +1,1 @@
-{ "version": "0.3.0", "notas": "Gran actualización: modo local (todo funciona sin servidor), barra inferior en el teléfono, cerrar sesión, iconos nuevos y botón de actualizar reparado" }
+{ "version": "0.3.1", "notas": "El login con Discord ahora se abre en tu navegador (más fiable en el teléfono)" }

@@ -48,5 +48,17 @@
 - `/negocio/resumen` perdía el campo `modo` al reconsultar tras sembrar datos de ejemplo → corregido.
 - `extraer_json`/`plan_por_defecto` se perdieron al reescribir `cerebro.py` → restauradas.
 
+### Auditoría v0.3.x (2026-11-11) — app revisada a fondo
+- Login con Discord: cambio a OAuth2 implícito (`response_type=token`) — **no requiere servidor**; `callback.html` en GitHub Pages entrega el token y código de acceso para la APK.
+- **Modo local**: la app funciona completa sin servidor (módulos con persistencia local, constructor IA portado a JS con las 5 plantillas, documentos, negocio con datos de ejemplo marcados); la dirección del servidor se configura en Cuenta.
+- Manifest reparado (`start_url: "./"` + `scope: "./"` — antes la PWA instalada era inaccesible en la subruta de GitHub Pages) + iconos PNG 192/512.
+- Service worker: solo mismo origen y red-primero (antes cacheaba respuestas de Discord y servía contenido viejo).
+- Móvil: barra de pestañas fija inferior con safe-area, botones a ancho completo, inputs 16px (evita zoom en iOS), topbar con ajuste de línea.
+- Marca unificada a NEXO (título, topbar, manifest); pie con versión dinámica.
+- Cuenta: cerrar sesión + campo de servidor de datos; expiración del token de Discord (7 días) detectada → re-login.
+- Tauri: plugin `opener` + `withGlobalTauri` — "Actualizar ahora" y el login abren el navegador del sistema (antes `window.open` no hacía nada en la APK).
+- GitHub Pages publicado (Source: GitHub Actions, activado por el dueño) y despliegue automático en cada push a main.
+- Publicado: v0.3.0 y v0.3.1 (login en navegador del sistema) — APK universal + Windows + macOS + Linux.
+
 ### Regla de este archivo
 Actualizarlo en cada unidad de trabajo: qué se hizo, qué queda, qué problemas.

@@ -1,4 +1,4 @@
-const VERSION_APP = "0.3.0";
+const VERSION_APP = "0.3.1";
 const URL_VERSIONES = "https://calamidad383.github.io/astral-nova-7f3c/version.json";
 const URL_RELEASES = "https://github.com/calamidad383/astral-nova-7f3c/releases/latest";
 
@@ -523,6 +523,18 @@ async function usuarioDiscord(token) {
   if (!r.ok) throw new Error("código no válido (" + r.status + ")");
   return r.json();
 }
+
+async function abrirEnNavegador(url) {
+  const tauri = window.__TAURI__;
+  if (tauri && tauri.opener && tauri.opener.openUrl) {
+    try { await tauri.opener.openUrl(url); return true; } catch {}
+  }
+  return false;
+}
+
+document.getElementById("btn-discord").addEventListener("click", async (e) => {
+  if (await abrirEnNavegador(e.currentTarget.href)) e.preventDefault();
+});
 
 async function entrarConCodigo() {
   const codigo = $("#codigo-acceso").value.trim();
